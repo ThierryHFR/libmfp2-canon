@@ -120,7 +120,7 @@ dpkg -i ../libmfp2-canon_0.1_amd64.deb
 
 # LICENSE
 
-## Licence of scangearmp2 in : README
-The following files are licensed under the terms of the GNU General Public License.
+## Licence of libmfp2-canon in : README
+The following files are licensed under the terms of the GNU General Public License Ver. 2.0.
 	
 
