@@ -8,15 +8,15 @@ Sane backend 'canon_pixma' for CANON's scanners
 
 	This backend is for making the CANON's scanners, using the new communication protocol,
 	to be supported by sane and any of the frontends implementing sane. It reuse the free
-        code of the scangearmp2 program to access to the scanners functionalities and 
-        implementing the sane functions.
+	code of the scangearmp2 program to access to the scanners functionalities and 
+	implementing the sane functions.
 
-        We separated the code from the backend, to make it a library with only free code.
+	We separated the code from the backend, to make it a library with only free code.
 
-        This library is dependent on the scangearmp2 package provided by Canon.
-        The current version is 3.50, the list of scanners supported is below.
-        You can download the archive that contains the 32/64 bit driver here:
-          http://gdlp01.c-wss.com/gds/1/0100009111/01/scangearmp2-3.50-1-deb.tar.gz
+	This library is dependent on the scangearmp2 package provided by Canon.
+	The current version is 3.50, the list of scanners supported is below.
+	You can download the archive that contains the 32/64 bit driver here:
+	  http://gdlp01.c-wss.com/gds/1/0100009111/01/scangearmp2-3.50-1-deb.tar.gz
        
 ```
 TS9100 series
