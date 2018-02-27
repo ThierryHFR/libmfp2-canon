@@ -1,0 +1,6 @@
+libmfp2-canon (0.1) stable; urgency=medium
+
+  * Backend sane for scangearmp2. 
+
+ -- Thierry HUCHARD <thierry@ordissimo.com>  Tue, 05 Dec 2017 21:03:04 +0100
+
