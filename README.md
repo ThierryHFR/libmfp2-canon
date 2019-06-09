@@ -107,6 +107,11 @@ apt-get update
 apt-get install debhelper libusb-1.0-0-dev libtool-bin libjpeg-dev
 # or, if failure, use:
 apt-get install debhelper libusb-1.0-0-dev libtool libjpeg-dev
+cd /tmp
+wget http://gdlp01.c-wss.com/gds/1/0100009931/01/scangearmp2-3.70-1-deb.tar.gz
+tar xvf scangearmp2-3.70-1-deb.tar.gz
+arch="$(if [[ "$(uname -p)" = "x86_64" ]] ; then echo "amd64"; else echo "i386"; fi)"
+dpkg -i scangearmp2-3.70-1-deb/packages/scangearmp2_3.70-1_${arch}.deb
 ```
 ###### Build Sources :
 ```
