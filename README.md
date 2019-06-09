@@ -161,7 +161,7 @@ rpmbuild -ba libmfp2-canon.spec
 ###### Install :
 ```
 cd ~/rpmbuild/RPMS
-rpm -i */libmfp2-canon-0.1*.rpm
+rpm -i libmfp2-canon-0.1*.rpm
 ```
 
 # LICENSE
