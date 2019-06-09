@@ -140,6 +140,11 @@ rm -rf libmfp2-canon-0.1
 ```
 ###### Get developement environnement :
 ```
+cd /tmp
+wget http://gdlp01.c-wss.com/gds/2/0100009932/01/scangearmp2-3.70-1-rpm.tar.gz
+tar xvf scangearmp2-3.70-1-rpm.tar.gz
+rpm -ivh scangearmp2-3.70-1-rpm/packages/scangearmp2-3.70-1.$(uname -p).rpm
+rm -rf scangearmp2-3.70-1-rpm
 yum install gcc make libjpeg-turbo-devel libusbx-devel libtool automake autoconf
 ```
 ###### Build Sources :
