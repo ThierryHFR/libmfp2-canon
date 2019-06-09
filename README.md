@@ -118,6 +118,43 @@ debuild -tc
 dpkg -i ../libmfp2-canon_0.1_amd64.deb
 ```
 
+## For redhat systems :
+###### Prepare system :
+```
+\# in all cases :
+mkdir -p ~/rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
+```
+###### Get sources :
+```
+\# first solution
+https://github.com/Ordissimo/libmfp2-canon/releases/download/0.1/libmfp2-canon-0.1-1.src.rpm
+rpm -ivh libmfp2-canon-0.1-1.src.rpm
+
+\# or second solution:
+cd ~/rpmbuild/SOURCES
+git clone https://github.com/Ordissimo/libmfp2-canon.git
+rm -rf libmfp2-canon/.git*
+mv libmfp2-canon libmfp2-canon-0.1
+tar czvf  libmfp2-canon-0.1.orig.tar.gz 
+cp libmfp2-canon-0.1/libmfp2-canon.spec ../SPECS/
+rm -rf libmfp2-canon-0.1
+```
+###### Get developement environnement :
+```
+\# in all cases :
+yum install gcc make libjpeg-turbo-devel libusbx-devel libtool automake autoconf
+```
+###### Build Sources :
+```
+cd ~/rpmbuild/SPECS
+rpmbuild -ba libmfp2-canon.spec
+```
+###### Install :
+```
+cd ~/rpmbuild/RPMS
+rpm -i */libmfp2-canon-0.1*.rpm
+```
+
 # LICENSE
 
 ## Licence of libmfp2-canon in : README
