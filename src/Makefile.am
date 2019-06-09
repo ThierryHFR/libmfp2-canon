@@ -1,4 +1,4 @@
-libsane_canon_pixmadir = /usr/lib/sane
+libsane_canon_pixmadir = $(libdir)/sane
 libsane_canon_pixma_LTLIBRARIES = libsane-canon_pixma.la
 libsane_canon_pixma_la_SOURCES = saneopts.h sane.h sanei_debug.h \
         sanei.h sanei_init_debug.c sanei_backend.h \
