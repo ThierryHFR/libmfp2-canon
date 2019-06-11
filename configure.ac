@@ -42,6 +42,10 @@ AC_FUNC_LSTAT_FOLLOWS_SLASHED_SYMLINK
 AC_FUNC_MALLOC
 AC_CHECK_FUNCS([memset strdup strncasecmp strtol])
 
+path_bjlib=$(find -iname "bjlib")
+AC_DEFINE(CNMSLIBPATH, [$path_bjlib], [Pat of bjlib in os])
+AC_SUBST(CNMSLIBPATH)
+
 libusb1="libusb-1.0 >= 1.0.0"
 PKG_CHECK_MODULES(LIBUSB_1_0, [$libusb1 libjpeg])
 AC_SUBST(LIBUSB_1_0_CFLAGS)
