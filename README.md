@@ -140,7 +140,7 @@ cd ~/rpmbuild/SOURCES
 git clone https://github.com/Ordissimo/libmfp2-canon.git
 rm -rf libmfp2-canon/.git*
 mv libmfp2-canon libmfp2-canon-0.1
-tar czvf  libmfp2-canon-0.1.orig.tar.gz 
+tar czvf libmfp2-canon-0.1.orig.tar.gz libmfp2-canon-0.1
 cp libmfp2-canon-0.1/libmfp2-canon.spec ../SPECS/
 rm -rf libmfp2-canon-0.1
 ```
