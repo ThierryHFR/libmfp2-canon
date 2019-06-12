@@ -14,9 +14,11 @@ Sane backend 'canon_pixma' for CANON's scanners
 	We separated the code from the backend, to make it a library with only free code.
 
 	This library is dependent on the scangearmp2 package provided by Canon.
-	The current version is 3.50, the list of scanners supported is below.
+	The current version is 3.70, the list of scanners supported is below.
 	You can download the archive that contains the 32/64 bit driver here:
-	  http://gdlp01.c-wss.com/gds/1/0100009111/01/scangearmp2-3.50-1-deb.tar.gz
+	  http://gdlp01.c-wss.com/gds/1/0100009931/01/scangearmp2-3.70-1-deb.tar.gz
+	  or
+	  http://gdlp01.c-wss.com/gds/2/0100009932/01/scangearmp2-3.70-1-rpm.tar.gz
        
 ```
 TS9100 series
