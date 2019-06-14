@@ -134,7 +134,7 @@ mkdir -p ~/rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
 ###### Get sources :
 ```
 ####### first solution
-https://github.com/Ordissimo/libmfp2-canon/releases/download/0.1/libmfp2-canon-0.1-1.src.rpm
+wget https://github.com/Ordissimo/libmfp2-canon/releases/download/0.1/libmfp2-canon-0.1-1.src.rpm
 rpm -ivh libmfp2-canon-0.1-1.src.rpm
 
 ####### or second solution:
