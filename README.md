@@ -16,11 +16,37 @@ Sane backend 'canon_pixma' for CANON's scanners
 	This library is dependent on the scangearmp2 package provided by Canon.
 	The current version is 3.70, the list of scanners supported is below.
 	You can download the archive that contains the 32/64 bit driver here:
-	  http://gdlp01.c-wss.com/gds/1/0100009931/01/scangearmp2-3.70-1-deb.tar.gz
+	  http://gdlp01.c-wss.com/gds/5/0100010485/01/scangearmp2-3.90-1-deb.tar.gz
 	  or
-	  http://gdlp01.c-wss.com/gds/2/0100009932/01/scangearmp2-3.70-1-rpm.tar.gz
+	  http://gdlp01.c-wss.com/gds/6/0100010486/01/scangearmp2-3.90-1-rpm.tar.gz
        
 ```
+## Add 2018
+ XK80 series
+ 
+ TS9580 series
+ TS9500 series
+  
+ TS8280 series
+ TS8230 series
+ TS8200 series
+ 
+ TS6280 series
+ TS6230 series
+ TS6200 series
+ 
+ TR9530 series
+ TR4500 series
+ 
+ G3010 series
+ G4010 series
+ 
+ E4200 series
+ 
+ LiDE 400
+ LiDE 300
+
+# Add before 2018
 TS9100 series
 TS8100 series
 TS6100 series
@@ -73,6 +99,22 @@ MB2100 series
 MB2700 series
 MB5100 series
 MB5400 series
+
+# Add 2019
+G6000 series
+G6080 series
+TS5300 series
+TS5380 series
+TS6300 series
+TS6380 series
+TS7330 series
+TS8300 series
+TS8380 series
+TS8330 series
+XK60 series
+TS6330 series
+TS3300 series
+E3300 series
 ```
 # ADVANTAGES
 
