@@ -1,6 +1,6 @@
 /*
  *  ScanGear MP for Linux
- *  Copyright CANON INC. 2007-2017
+ *  Copyright CANON INC. 2007-2020
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -36,6 +36,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <dlfcn.h>
+
 #include "support.h"
 
 #define CANONMUD	(9600)
@@ -691,7 +692,7 @@ CMT_Status CIJSC_open2(
 
 	/* set product id. */
 	DBGMSG("p_canon_init_scanner() product = %X\n", dev->product_id);
-	if ( canon_init_scanner( dev->product_id, dev->speed, NULL ) < 0 ) {
+	if ( canon_init_scanner( dev->product_id, dev->speed, NULL) < 0 ) {
 		DBGMSG("ERROR : p_canon_init_scanner() product = %d\n", dev->product_id);
 		return (CMT_STATUS_INVAL);
 	}

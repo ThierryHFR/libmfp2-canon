@@ -1,6 +1,6 @@
 /*
  *  ScanGear MP for Linux
- *  Copyright CANON INC. 2007-2017
+ *  Copyright CANON INC. 2007-2020
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -99,6 +99,10 @@ typedef struct
 	int			scanning_page;
 	char		file_path[ PATH_MAX ];
 
+	int			scan_x;
+	int			scan_y;
+	int			scan_wx;
+	int			scan_hy;
 	int			scan_w;
 	int			scan_h;
 	int			scan_res;
