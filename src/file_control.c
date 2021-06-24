@@ -70,6 +70,7 @@ CNMSInt32 FileControlGetStatus(
 	CNMSLPSTR		path_dir = CNMSNULL, path_temp;
 	CNMSInt32		ret = FILECONTROL_STATUS_OTHER_ERROR;
 	
+	(void)pathLen;
 	if( path == CNMSNULL ){
 		DBGMSG( "[FileControlGetStatus]Parameter is error.\n" );
 		goto	EXIT;

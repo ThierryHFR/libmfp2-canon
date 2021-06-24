@@ -37,6 +37,8 @@
 #include <libusb.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <libgen.h>
+#include <stdnoreturn.h>
 
 #include "support.h"
 #include "errors.h"
@@ -404,7 +406,7 @@ int cmt_libusb_init(void)
 	const struct libusb_interface *iptr = NULL;					/* Array of interface descriptors */
 	const struct libusb_interface_descriptor *altptr = NULL;	/* interface descriptor */
 	struct libusb_config_descriptor *cptr = NULL;				/* configuration descriptor */
-	int i, cNum, iNum, altNum;
+	int i;
 	unsigned char busnum, address;
 	
 	if( !g_context ){
@@ -423,7 +425,7 @@ int cmt_libusb_init(void)
 		goto onErr;
 	}
 	/* search canon mfp */
-	numdev = libusb_get_device_list(NULL, &g_devlist);
+	numdev = libusb_get_device_list(g_context, &g_devlist);
 	if((int)numdev == 0) {
 		err = CN_USB_WRITE_ERROR;
 		goto onErr;
@@ -525,10 +527,6 @@ CMT_Status cmt_libusb_open(const char *devname, int *index)
 	struct libusb_device_descriptor devdesc;					/* device descriptor */
 	const struct libusb_interface *iptr = NULL;					/* Array of interface descriptors */
 	const struct libusb_interface_descriptor *altptr = NULL;	/* interface descriptor */
-	uint8_t cNum,												/* configuration number */
-			iNum,												/* interface number */
-			altNum;	
-	
 	int ret;
 	int dev_index, ep_no, numEndpoints;
 	struct libusb_config_descriptor *cptr = NULL;		/* configuration descriptor */
@@ -728,7 +726,7 @@ CMT_Status cmt_libusb_bulk_write( int index, unsigned char *buffer, unsigned lon
 	DBGMSG( " (*size:%d,request_bytes:%d)--->\n" ,*size,request_bytes);
 #endif
 	err = libusb_bulk_transfer( libusbdev[index].handle, libusbdev[index].ep_bulk_out_address,
-					(char *)buffer, request_bytes, &ret_bytes, LIBUSB_TIMEOUT );
+					(unsigned char *)buffer, request_bytes, &ret_bytes, LIBUSB_TIMEOUT );
 	
 	if ( err < 0 ) { /* error happend. */
 		libusb_clear_halt( libusbdev[index].handle, libusbdev[index].ep_bulk_out_address );
@@ -769,7 +767,7 @@ CMT_Status cmt_libusb_bulk_read( int index, unsigned char *buffer, unsigned long
 	DBGMSG( " (*size:%d,request_bytes:%d)--->\n" ,*size,request_bytes);
 #endif
 	err = libusb_bulk_transfer( libusbdev[index].handle, libusbdev[index].ep_bulk_in_address,
-					(char *)buffer, request_bytes, &ret_bytes, LIBUSB_TIMEOUT );
+					(unsigned char *)buffer, request_bytes, &ret_bytes, LIBUSB_TIMEOUT );
 	
 	if ( !ret_bytes ) {
 		if ( err < 0 ) { /* error happend. */
@@ -794,7 +792,7 @@ CMT_Status cmt_libusb_bulk_read( int index, unsigned char *buffer, unsigned long
 void cmt_network_init( void *cnnl_callback )
 {
 	CNNLHANDLE hmdl=NULL;
-	int i=0, j=0, k=0, max = NETWORK_DEV_MAX, found=0, found_cache=0, timeout_msec = 0;
+	int j=0, k=0, max = NETWORK_DEV_MAX, found=0, found_cache=0, timeout_msec = 0;
 	CNNLNICINFO *nic;
 	char model[STRING_SHORT], ipaddr[STRING_SHORT];
 	unsigned long version = 110, versize;
@@ -843,8 +841,8 @@ void cmt_network_init( void *cnnl_callback )
 			if( CNNL_OpenEx( hmdl, ipaddr, CNNET_TYPE_MULTIPASS, 1, 1000 ) == CNNL_RET_SUCCESS ){
 				if( CNNL_GetModelName( hmdl, model, STRING_SHORT, 3, 3000) == CNNL_RET_SUCCESS){
 					
-					strncpy( networkdev[j].modelName, model, STRING_SHORT-1 );
-					strncpy( networkdev[j].ipAddStr, ipaddr, STRING_SHORT-1 );
+					strncpy( networkdev[j].modelName, model, STRING_SHORT );
+					strncpy( networkdev[j].ipAddStr, ipaddr, STRING_SHORT );
 					snprintf( networkdev[j].macAddStr, STRING_SHORT-1, "%02X-%02X-%02X-%02X-%02X-%02X",
 						nic[j].macaddr[0],nic[j].macaddr[1],nic[j].macaddr[2], nic[j].macaddr[3],nic[j].macaddr[4],nic[j].macaddr[5] );
 					
@@ -955,7 +953,7 @@ void cmt_network_mutex_unlock( void )
 	}
 }
 
-void cmt_network_keep_session( void *hnd )
+void *cmt_network_keep_session( void *hnd )
 {
 	int				i;
 	unsigned long	d_time;
@@ -1003,6 +1001,7 @@ void cmt_network_keep_session( void *hnd )
 			WAIT_300MSEC;
 		}
 	}
+        return NULL;
 }
 
 
@@ -1185,10 +1184,8 @@ void cmt_network2_init( void *cnnl_callback )
 	tagSearchPrinterInfo *infoList = NULL;
 	CNNET2_ERROR_CODE err;
 	unsigned int size = 0;
-	unsigned int i;
-	int num = 0;
+	int num = 0, i = 0;
 	unsigned int timeout;
-	void *cnnet2_callback = NULL;
 	
 	if( network2_inited ) return;
 	network2_inited = 1;

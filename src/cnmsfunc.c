@@ -52,7 +52,7 @@ CNMSInt32 CnmsStrLen(
 		DBGMSG( "[CnmsStrLen]Parameter is error.\n" );
 		goto	EXIT;
 	}
-	ret = strlen( lpStr );
+	ret = (CNMSInt32)strlen( (char*)lpStr );
 EXIT:
 #ifdef	__CNMS_DEBUG_FUNC__
 	DBGMSG( "[CnmsStrLen(lpStr:%s)]=%d.\n", lpStr, ret );
@@ -93,6 +93,7 @@ CNMSInt32 CnmsStrCat(
 		CNMSLPSTR		lpDst,
 		CNMSInt32		dstLen )
 {
+	CNMSInt32	dstLenX = 0;
 	CNMSInt32	ret = CNMS_ERR, totalLen, srcLen;
 	
 	if( ( lpSrc == CNMSNULL ) || ( lpDst == CNMSNULL ) || ( dstLen <= 0 ) ){
@@ -100,13 +101,15 @@ CNMSInt32 CnmsStrCat(
 		goto	EXIT;
 	}
 
+    dstLenX = CnmsStrLen( (CNMSInt8 *)lpDst );
 	srcLen = CnmsStrLen( (CNMSInt8 *)lpSrc );
-	if( ( totalLen  = srcLen + CnmsStrLen( (CNMSInt8 *)lpDst ) ) >= dstLen ){
+	if( ( totalLen  = srcLen + dstLenX ) >= dstLen ){
 		DBGMSG( "[CnmsStrCat]total string(%d) is too long(>%d).\n", totalLen, dstLen );
 		goto	EXIT;
 	}
-	
-	strncat( (CNMSInt8 *)lpDst, (CNMSInt8 *)lpSrc, srcLen );
+
+	memcpy(&lpDst[dstLenX], lpSrc, (int)srcLen);
+
 	lpDst[ totalLen ] = '\0';
 
 	ret = totalLen;

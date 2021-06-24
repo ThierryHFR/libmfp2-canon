@@ -55,8 +55,6 @@ typedef struct{
 
 static LPKEEPSETTINGCOMMONCOMP	lpCommonSetting = CNMSNULL;
 
-static CNMSInt32 SubReadSettingFile( CNMSFd fd );
-static CNMSInt32 SubWriteSettingFile( CNMSFd fd );
 #ifdef	__CNMS_DEBUG_KEEP_SETTING__
 static CNMSVoid DebugKeepSettingComp( CNMSVoid );
 #endif
@@ -127,7 +125,7 @@ EXIT:
 
 static CNMSInt32 SubReadSettingCommonFile( CNMSFd fd )
 {
-	CNMSInt32	ret = CNMS_ERR, rasSize, i, j, ldata;
+	CNMSInt32	ret = CNMS_ERR, rasSize, i, j;
 	CNMSLPSTR	lpBuf = CNMSNULL, lpStr;
 
 	if( ( lpBuf = CnmsGetMem( KEEP_SETTING_RASTER_LEN ) ) == CNMSNULL ){
@@ -143,7 +141,6 @@ static CNMSInt32 SubReadSettingCommonFile( CNMSFd fd )
 		}
 		for( i = 0 ; i < KEEPSETTING_COMMON_ID_MAX ; i ++ ){
 			lpStr = KeepSettingCommonStrArray[ i ];
-			ldata = CNMS_ERR;
 			for( j = 0 ; j < rasSize ; j ++ ){
 				if( lpBuf[ j ] != lpStr[ j ] ){
 					if( lpStr[ j ] == '\0' ){
