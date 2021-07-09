@@ -1014,7 +1014,6 @@ fprintf(stderr, "Format User : [%dx%d|%dx%d]\n", handled->sgmp.scan_x, handled->
 	param.ScanMode			= ( handled->sgmp.scan_color == CIJSC_COLOR_COLOR ) ? 4 : 2;
 	param.ScanMethod		= (handled->sgmp.scan_scanmode ? CIJSC_SCANMODE_ADF_D_L : CIJSC_SCANMODE_PLATEN);
 fprintf(stderr, "Scan Methode : [%s]\n", scan_table[handled->sgmp.scan_scanmode]);
-        s->val[OPT_SCAN_SOURCE].s = strdup (scan_table[0]);
 	param.opts.p1_0			= 0;
 	param.opts.p2_0			= 0;
 	param.opts.p3_3			= 3;
