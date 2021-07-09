@@ -161,8 +161,7 @@ _get_source_adf_size(int right, int bottom) {
 /* scanmode */
 static const SANE_String_Const scan_table[] = {
         "Platen",
-	"ADF Simplex",
-        "ADF Duplex",
+	"ADF"
 };
 
 static const SANE_String_Const mode_list[] = {
@@ -181,9 +180,9 @@ static int
 _get_source_num(const SANE_String_Const source)
 {
     int i = 0;
-    for (i = 0; scan_table[i]; ++i)
+    for (i = 0; i < 2; ++i)
     {
-	if (!strcmp(scan_table[i], source))
+	if (!strcasecmp(scan_table[i], source))
 	   return i;
     }
     return CIJSC_SCANMODE_PLATEN;
@@ -1013,7 +1012,9 @@ fprintf(stderr, "Res User  : [%d]\n", handled->sgmp.scan_res);
 fprintf(stderr, "Format Max  : [0x0|%dx%d]\n", handled->sgmp.scan_w, handled->sgmp.scan_h);
 fprintf(stderr, "Format User : [%dx%d|%dx%d]\n", handled->sgmp.scan_x, handled->sgmp.scan_y, handled->sgmp.scan_wx, handled->sgmp.scan_hy);
 	param.ScanMode			= ( handled->sgmp.scan_color == CIJSC_COLOR_COLOR ) ? 4 : 2;
-	param.ScanMethod		= handled->sgmp.scan_scanmode;
+	param.ScanMethod		= (handled->sgmp.scan_scanmode ? CIJSC_SCANMODE_ADF_D_L : CIJSC_SCANMODE_PLATEN);
+fprintf(stderr, "Scan Methode : [%s]\n", scan_table[handled->sgmp.scan_scanmode]);
+        s->val[OPT_SCAN_SOURCE].s = strdup (scan_table[0]);
 	param.opts.p1_0			= 0;
 	param.opts.p2_0			= 0;
 	param.opts.p3_3			= 3;
