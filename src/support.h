@@ -30,6 +30,7 @@
 #  include <config.h>
 #endif
 
+#include <stdio.h>
 #include <limits.h>
 
 /*
