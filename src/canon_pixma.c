@@ -171,7 +171,7 @@ static const SANE_String_Const mode_list[] = {
 
 static const SANE_Int resbit_list[] =
 {
-	2, 300, 600
+	1, 300
 };
 
 const char *canonJpegDataTmp = "/tmp/jpeg_canon.tmp";
@@ -696,7 +696,7 @@ init_options (canon_sane_t * s)
 	/* TODO: Build the constraints on resolution in a smart way */
 	s->opt[OPT_RESOLUTION].constraint_type = SANE_CONSTRAINT_WORD_LIST;
 	s->opt[OPT_RESOLUTION].constraint.word_list = resbit_list;
-	s->val[OPT_RESOLUTION].w = s->sgmp.scan_res;
+	s->val[OPT_RESOLUTION].w = s->sgmp.scan_res = resbit_list[1];
 
 	s->opt[OPT_PREVIEW].name = SANE_NAME_PREVIEW;
 	s->opt[OPT_PREVIEW].title = SANE_TITLE_PREVIEW;
@@ -899,32 +899,32 @@ sane_control_option (SANE_Handle h, SANE_Int n,
                                 break;
 			case OPT_BR_X:
 			   	handled->val[n].w = *(SANE_Word *) v;
-                                if (handled->sgmp.scan_scanmode == CIJSC_SCANMODE_PLATEN)
-                                    size = _get_source_size(MM_TO_PIXEL(handled->val[n].w, 300), -1);
-                                else
-                                    size = _get_source_adf_size(MM_TO_PIXEL(handled->val[n].w, 300), -1);
-                                handled->sgmp.scan_wx = size.right * (handled->sgmp.scan_res == 300 ? 1 : 2);
-                                handled->sgmp.scan_hy = size.bottom * (handled->sgmp.scan_res == 300 ? 1 : 2);
-			      	handled->sgmp.scan_w = size.right;
-			      	handled->sgmp.scan_h = size.bottom;
-                                handled->val[n].w = PIXEL_TO_MM(size.right, 300);
-                                handled->val[OPT_BR_Y].w = PIXEL_TO_MM(size.bottom, 300);
+                if (handled->sgmp.scan_scanmode == CIJSC_SCANMODE_PLATEN)
+                     size = _get_source_size(MM_TO_PIXEL(handled->val[n].w, 300), -1);
+                else
+                     size = _get_source_adf_size(MM_TO_PIXEL(handled->val[n].w, 300), -1);
+                handled->sgmp.scan_wx = size.right * (handled->sgmp.scan_res == 300 ? 1 : 2);
+                handled->sgmp.scan_hy = size.bottom * (handled->sgmp.scan_res == 300 ? 1 : 2);
+			    handled->sgmp.scan_w = size.right;
+			    handled->sgmp.scan_h = size.bottom;
+                handled->val[n].w = PIXEL_TO_MM(size.right, 300);
+                handled->val[OPT_BR_Y].w = PIXEL_TO_MM(size.bottom, 300);
 			   	if(i){
 			     		*i |= SANE_INFO_RELOAD_PARAMS | SANE_INFO_RELOAD_OPTIONS | SANE_INFO_INEXACT;
 			   	}
 			   	break;
 			case OPT_BR_Y:
 			   	handled->val[n].w = *(SANE_Word *) v;
-                                if (handled->sgmp.scan_scanmode == CIJSC_SCANMODE_PLATEN)
-                                    size = _get_source_size(-1, MM_TO_PIXEL(handled->val[n].w, 300));
-                                else
-                                    size = _get_source_adf_size(-1, MM_TO_PIXEL(handled->val[n].w, 300));
-                                handled->sgmp.scan_wx = size.right * (handled->sgmp.scan_res == 300 ? 1 : 2);
-                                handled->sgmp.scan_hy = size.bottom * (handled->sgmp.scan_res == 300 ? 1 : 2);
-			      	handled->sgmp.scan_w = size.right;
-			      	handled->sgmp.scan_h = size.bottom;
-                                handled->val[n].w = PIXEL_TO_MM(size.bottom, 300);
-                                handled->val[OPT_BR_X].w = PIXEL_TO_MM(size.right, 300);
+                if (handled->sgmp.scan_scanmode == CIJSC_SCANMODE_PLATEN)
+                   size = _get_source_size(-1, MM_TO_PIXEL(handled->val[n].w, 300));
+                else
+                   size = _get_source_adf_size(-1, MM_TO_PIXEL(handled->val[n].w, 300));
+                handled->sgmp.scan_wx = size.right * (handled->sgmp.scan_res == 300 ? 1 : 2);
+                handled->sgmp.scan_hy = size.bottom * (handled->sgmp.scan_res == 300 ? 1 : 2);
+			    handled->sgmp.scan_w = size.right;
+			    handled->sgmp.scan_h = size.bottom;
+                handled->val[n].w = PIXEL_TO_MM(size.bottom, 300);
+                handled->val[OPT_BR_X].w = PIXEL_TO_MM(size.right, 300);
 			   	if(i){
 			     		*i |= SANE_INFO_RELOAD_PARAMS | SANE_INFO_RELOAD_OPTIONS | SANE_INFO_INEXACT;
 			   	}
@@ -945,7 +945,7 @@ sane_control_option (SANE_Handle h, SANE_Int n,
 			   	break;
 			case OPT_RESOLUTION:
 			      	v1 = (int)*(SANE_Word*)v;
-                              	v1 = _get_resolution(v1);
+                              	v1 = 300; //_get_resolution(v1);
 			      	handled->sgmp.scan_res = v1 ;
 			      	handled->val[n].w = v1;
                                 if (v1 == 300) {
@@ -1006,8 +1006,8 @@ sane_start (SANE_Handle h){
 	param.YRes			= handled->sgmp.scan_res;
 	param.Left			= 0;
 	param.Top			= 0;
-	param.Right			= handled->sgmp.scan_wx;
-	param.Bottom			= handled->sgmp.scan_hy;
+	param.Right			= handled->sgmp.scan_w; // handled->sgmp.scan_wx;
+	param.Bottom			= handled->sgmp.scan_h; // handled->sgmp.scan_hy;
 fprintf(stderr, "Res User  : [%d]\n", handled->sgmp.scan_res);
 fprintf(stderr, "Format Max  : [0x0|%dx%d]\n", handled->sgmp.scan_w, handled->sgmp.scan_h);
 fprintf(stderr, "Format User : [%dx%d|%dx%d]\n", handled->sgmp.scan_x, handled->sgmp.scan_y, handled->sgmp.scan_wx, handled->sgmp.scan_hy);
@@ -1030,6 +1030,30 @@ fprintf(stderr, "Scan Methode : [%s]\n", scan_table[handled->sgmp.scan_scanmode]
 	handled->decompress_scan_data = SANE_FALSE;
 	handled->end_read = SANE_FALSE;
 	handled->img_read = 0 ;
+
+/*
+	param.XRes			= data->scan_res = 300;
+	param.YRes			= 300;
+	param.Left			= 0;
+	param.Top			= 0;
+	param.Right			= data->scan_w = sourceSize[i].right;
+	param.Bottom		= data->scan_h = sourceSize[i].bottom;
+	param.ScanMode		= ( data->scan_color == CIJSC_COLOR_COLOR ) ? 4 : 2;
+	param.ScanMethod	= ( data->scan_scanmode == CIJSC_SCANMODE_ADF_D_S ) ? CIJSC_SCANMODE_ADF_D_L : data->scan_scanmode;
+	param.opts.p1_0		= 0;
+	param.opts.p2_0		= 0;
+	param.opts.p3_3		= 3;
+	param.opts.DocumentType		= data->scan_source + 1;
+	param.opts.p4_0		= 0;
+	param.opts.p5_0		= 0;
+	param.opts.p6_1		= 1;
+	
+	progress_id			= ( data->scan_scanmode == CIJSC_SCANMODE_PLATEN ) ? CIJSC_PROGRESS_SCANNING_PLATEN : CIJSC_PROGRESS_SCANNING_ADF;
+	
+	data->scan_result	= CIJSC_SCANMAIN_SCAN_FINISHED;
+	data->scanning_page = 1;
+	data->last_error_quit = CIJSC_ERROR_DLG_QUIT_FALSE;
+ */
 
 SCAN_START:
 		/* scan start*/
