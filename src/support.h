@@ -130,6 +130,14 @@ enum{
 	CIJSC_SCANMODE_ADF_D_S,
 };
 
+
+
+#define FLATBED _("Flatben")
+#define ADF _("ADF")
+#define ADF_LSD _("ADF Duplex (Long-side Binding)")
+#define ADF_SSD _("ADF Duplex (Short-side Binding)")
+
+
 /* select source list */
 enum{
 	CIJSC_SOURCE_DOCUMENT = 0,
