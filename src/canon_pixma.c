@@ -43,6 +43,7 @@ typedef struct Handled{
 	struct Handled * next;
 	SGMP_Data_Lite sgmp;
 	CANON_Device dev;
+	SANE_String_Const *sources;
 	CANON_ScanParam param;
 	SANE_Option_Descriptor opt[NUM_OPTIONS];
 	Option_Value val[NUM_OPTIONS];
@@ -86,6 +87,10 @@ static const CIJSC_SIZE_TABLE sourceSize[] = {
 	{ CIJSC_SIZE_LETTER,	        2550, 3300 }		// Letter
 };
 
+static const SANE_String_Const mode_list[] = {
+  SANE_VALUE_SCAN_MODE_COLOR, SANE_VALUE_SCAN_MODE_GRAY,
+  0
+};
 
 static CIJSC_SIZE_TABLE
 _get_source_size(int right, int bottom) {
@@ -160,13 +165,10 @@ _get_source_adf_size(int right, int bottom) {
 
 /* scanmode */
 static const SANE_String_Const scan_table[] = {
-        "Platen",
-	"ADF"
-};
-
-static const SANE_String_Const mode_list[] = {
-  SANE_VALUE_SCAN_MODE_COLOR, SANE_VALUE_SCAN_MODE_GRAY,
-  0
+	FLATBED,
+	ADF,
+	ADF_LSD,
+	ADF_SSD
 };
 
 static const SANE_Int resbit_list[] =
@@ -608,6 +610,7 @@ static CMT_Status init_canon_options(canon_sane_t * handled){
 	data->scan_format = CIJSC_FORMAT_JPEG;
 	data->scan_size = CIJSC_SIZE_A4;
 	data->scan_result = CIJSC_SCANMAIN_SCAN_FINISHED;
+	
 /*
 	for ( i = 0; i < sizeof( sourceSize ) / sizeof( CIJSC_SIZE_TABLE ) ; i++ ) {
 		if ( sourceSize[i].id == data->scan_size ) {
@@ -758,15 +761,15 @@ init_options (canon_sane_t * s)
 	s->val[OPT_BR_Y].w = s->y_range.max;
 
 	/* OPT_SCAN_SOURCE */
-        s->opt[OPT_SCAN_SOURCE].name = SANE_NAME_SCAN_SOURCE;
-        s->opt[OPT_SCAN_SOURCE].title = SANE_TITLE_SCAN_SOURCE;
-        s->opt[OPT_SCAN_SOURCE].desc = SANE_DESC_SCAN_SOURCE;
-        s->opt[OPT_SCAN_SOURCE].type = SANE_TYPE_STRING;
-        // s->opt[OPT_SCAN_SOURCE].size = x_source;
-        s->opt[OPT_SCAN_SOURCE].cap = SANE_CAP_SOFT_SELECT | SANE_CAP_SOFT_DETECT;
-        s->opt[OPT_SCAN_SOURCE].constraint_type = SANE_CONSTRAINT_STRING_LIST;
-        s->opt[OPT_SCAN_SOURCE].constraint.string_list = scan_table;
-        s->val[OPT_SCAN_SOURCE].s = strdup (scan_table[0]);
+    s->opt[OPT_SCAN_SOURCE].name = SANE_NAME_SCAN_SOURCE;
+    s->opt[OPT_SCAN_SOURCE].title = SANE_TITLE_SCAN_SOURCE;
+    s->opt[OPT_SCAN_SOURCE].desc = SANE_DESC_SCAN_SOURCE;
+    s->opt[OPT_SCAN_SOURCE].type = SANE_TYPE_STRING;
+    // s->opt[OPT_SCAN_SOURCE].size = x_source;
+    s->opt[OPT_SCAN_SOURCE].cap = SANE_CAP_SOFT_SELECT | SANE_CAP_SOFT_DETECT;
+    s->opt[OPT_SCAN_SOURCE].constraint_type = SANE_CONSTRAINT_STRING_LIST;
+    s->opt[OPT_SCAN_SOURCE].constraint.string_list = s->sources;
+    s->val[OPT_SCAN_SOURCE].s = strdup (s->sources[0]);
 	s->sgmp.scan_scanmode = CIJSC_SCANMODE_PLATEN;
 
 	return status == CMT_STATUS_GOOD ? status : show_canon_cmt_error(status);
@@ -775,7 +778,7 @@ init_options (canon_sane_t * s)
 
 SANE_Status
 sane_open (SANE_String_Const name, SANE_Handle * h){
-
+    int i = 0;
 	canon_sane_t *  handled = NULL;
 	CANON_Device dev;
 	CMT_Status status = CMT_STATUS_INVAL;
@@ -795,13 +798,30 @@ sane_open (SANE_String_Const name, SANE_Handle * h){
 		return show_sane_cmt_error(CMT_STATUS_NO_MEM);
 	}
 
+	handled->dev = dev;
+	handled->sources = (SANE_String_Const *)malloc(sizeof(SANE_String_Const) * 4);
+	for (i = 0; i < 4; i++)
+        handled->sources[i] = NULL;
+    i = 0;
+	if ( CIJSC_GET_SUPPORT_PLATEN( dev.type ) ) {
+		handled->sources[i] = (SANE_String_Const)strdup(scan_table[0]);
+		i++;
+	}
+	if ( CIJSC_GET_SUPPORT_ADF_S( dev.type ) ) {
+		handled->sources[i] = (SANE_String_Const)strdup(scan_table[1]);
+		i++;
+	}
+	if ( CIJSC_GET_SUPPORT_ADF_D( dev.type ) ) {
+		handled->sources[i] = (SANE_String_Const)strdup(scan_table[2]);
+		i++;
+		handled->sources[i] = (SANE_String_Const)strdup(scan_table[3]);
+		i++;
+	}
 
 	status = init_options(handled);
 	if(status != CMT_STATUS_GOOD){
 		return show_sane_cmt_error(status);
 	}
-
-	handled->dev = dev;
 	handled->cancel = SANE_FALSE;
 	handled->write_scan_data = SANE_FALSE;
 	handled->decompress_scan_data = SANE_FALSE;
@@ -1012,7 +1032,7 @@ fprintf(stderr, "Res User  : [%d]\n", handled->sgmp.scan_res);
 fprintf(stderr, "Format Max  : [0x0|%dx%d]\n", handled->sgmp.scan_w, handled->sgmp.scan_h);
 fprintf(stderr, "Format User : [%dx%d|%dx%d]\n", handled->sgmp.scan_x, handled->sgmp.scan_y, handled->sgmp.scan_wx, handled->sgmp.scan_hy);
 	param.ScanMode			= ( handled->sgmp.scan_color == CIJSC_COLOR_COLOR ) ? 4 : 2;
-	param.ScanMethod		= (handled->sgmp.scan_scanmode ? CIJSC_SCANMODE_ADF_D_L : CIJSC_SCANMODE_PLATEN);
+	param.ScanMethod		= (handled->sgmp.scan_scanmode == CIJSC_SCANMODE_ADF_D_S ) ? CIJSC_SCANMODE_ADF_D_L : handled->sgmp.scan_scanmode;
 fprintf(stderr, "Scan Methode : [%s]\n", scan_table[handled->sgmp.scan_scanmode]);
 	param.opts.p1_0			= 0;
 	param.opts.p2_0			= 0;
