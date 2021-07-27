@@ -167,8 +167,7 @@ _get_source_adf_size(int right, int bottom) {
 static const SANE_String_Const scan_table[] = {
 	FLATBED,
 	ADF,
-	ADF_LSD,
-	ADF_SSD
+	ADF_LSD
 };
 
 static const SANE_Int resbit_list[] =
@@ -799,8 +798,8 @@ sane_open (SANE_String_Const name, SANE_Handle * h){
 	}
 
 	handled->dev = dev;
-	handled->sources = (SANE_String_Const *)malloc(sizeof(SANE_String_Const) * 4);
-	for (i = 0; i < 4; i++)
+	handled->sources = (SANE_String_Const *)malloc(sizeof(SANE_String_Const) * 3);
+	for (i = 0; i < 3; i++)
         handled->sources[i] = NULL;
     i = 0;
 	if ( CIJSC_GET_SUPPORT_PLATEN( dev.type ) ) {
@@ -813,8 +812,6 @@ sane_open (SANE_String_Const name, SANE_Handle * h){
 	}
 	if ( CIJSC_GET_SUPPORT_ADF_D( dev.type ) ) {
 		handled->sources[i] = (SANE_String_Const)strdup(scan_table[2]);
-		i++;
-		handled->sources[i] = (SANE_String_Const)strdup(scan_table[3]);
 		i++;
 	}
 
