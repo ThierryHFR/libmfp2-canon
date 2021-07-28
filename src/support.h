@@ -132,9 +132,9 @@ enum{
 
 
 
-#define FLATBED _("Flatben")
-#define ADF _("ADF")
-#define ADF_LSD _("ADF Duplex")
+#define FLATBED "flatben"
+#define ADF "ADF"
+#define ADF_DUPLEX "ADF Duplex"
 
 
 /* select source list */

@@ -36,13 +36,15 @@ static void output_no_message(j_common_ptr);
 static const char vendor_str[] = "CANON";
 static const char type_str[] = "multi-function peripheral";
 
+static const CANON_Device ** canon_list = NULL;
+static int count_canon_list = 0;
 static const SANE_Device **dev_list = NULL;
 
 
 typedef struct Handled{
 	struct Handled * next;
 	SGMP_Data_Lite sgmp;
-	CANON_Device dev;
+	const CANON_Device *dev;
 	SANE_String_Const *sources;
 	CANON_ScanParam param;
 	SANE_Option_Descriptor opt[NUM_OPTIONS];
@@ -167,7 +169,7 @@ _get_source_adf_size(int right, int bottom) {
 static const SANE_String_Const scan_table[] = {
 	FLATBED,
 	ADF,
-	ADF_LSD
+	ADF_DUPLEX
 };
 
 static const SANE_Int resbit_list[] =
@@ -181,7 +183,7 @@ static int
 _get_source_num(const SANE_String_Const source)
 {
     int i = 0;
-    for (i = 0; i < 2; ++i)
+    for (i = 0; i < 3; ++i)
     {
 	if (!strcasecmp(scan_table[i], source))
 	   return i;
@@ -569,26 +571,25 @@ SANE_Status
 sane_get_devices (const SANE_Device *** device_list, SANE_Bool local_only)
 {
 	UNUSED (local_only);
-	int num_scan = 0;
-	const CANON_Device ** canon_list = NULL;
+	count_canon_list = 0;
+	canon_list = NULL;
 	CMT_Status status;
 	if (!device_list){
 		return show_sane_cmt_error(CMT_STATUS_INVAL);
 	}
 
 	/* initialize selected device cache. */
-	num_scan = 0;
-	canon_list = canon_get_device(&num_scan,&status);
+	canon_list = canon_get_device(&count_canon_list,&status);
 	if(canon_list == NULL){
 		return show_sane_cmt_error(CMT_STATUS_NO_MEM);
 	}
 	if(status != CMT_STATUS_GOOD){
 		return show_sane_cmt_error(status);
 	}
-	dev_list = (const SANE_Device **) calloc (num_scan + 1, sizeof (*dev_list));
+	dev_list = (const SANE_Device **) calloc (count_canon_list + 1, sizeof (*dev_list));
 
 	int i = 0;
-	for(;i< num_scan;i++){
+	for(;i< count_canon_list;i++){
 		dev_list[i] = convertFromCanonDev(canon_list[i]);
 	        dev_list[i+1] = NULL;
 	}
@@ -760,16 +761,16 @@ init_options (canon_sane_t * s)
 	s->val[OPT_BR_Y].w = s->y_range.max;
 
 	/* OPT_SCAN_SOURCE */
-    s->opt[OPT_SCAN_SOURCE].name = SANE_NAME_SCAN_SOURCE;
-    s->opt[OPT_SCAN_SOURCE].title = SANE_TITLE_SCAN_SOURCE;
-    s->opt[OPT_SCAN_SOURCE].desc = SANE_DESC_SCAN_SOURCE;
-    s->opt[OPT_SCAN_SOURCE].type = SANE_TYPE_STRING;
-    // s->opt[OPT_SCAN_SOURCE].size = x_source;
-    s->opt[OPT_SCAN_SOURCE].cap = SANE_CAP_SOFT_SELECT | SANE_CAP_SOFT_DETECT;
-    s->opt[OPT_SCAN_SOURCE].constraint_type = SANE_CONSTRAINT_STRING_LIST;
-    s->opt[OPT_SCAN_SOURCE].constraint.string_list = s->sources;
-    s->val[OPT_SCAN_SOURCE].s = strdup (s->sources[0]);
-	s->sgmp.scan_scanmode = CIJSC_SCANMODE_PLATEN;
+        s->opt[OPT_SCAN_SOURCE].name = SANE_NAME_SCAN_SOURCE;
+        s->opt[OPT_SCAN_SOURCE].title = SANE_TITLE_SCAN_SOURCE;
+        s->opt[OPT_SCAN_SOURCE].desc = SANE_DESC_SCAN_SOURCE;
+        s->opt[OPT_SCAN_SOURCE].type = SANE_TYPE_STRING;
+        // s->opt[OPT_SCAN_SOURCE].size = x_source;
+        s->opt[OPT_SCAN_SOURCE].cap = SANE_CAP_SOFT_SELECT | SANE_CAP_SOFT_DETECT;
+        s->opt[OPT_SCAN_SOURCE].constraint_type = SANE_CONSTRAINT_STRING_LIST;
+        s->opt[OPT_SCAN_SOURCE].constraint.string_list = s->sources;
+        s->val[OPT_SCAN_SOURCE].s = strdup (s->sources[0]);
+	s->sgmp.scan_scanmode = _get_source_num(s->sources[0]);
 
 	return status == CMT_STATUS_GOOD ? status : show_canon_cmt_error(status);
 
@@ -777,7 +778,8 @@ init_options (canon_sane_t * s)
 
 SANE_Status
 sane_open (SANE_String_Const name, SANE_Handle * h){
-    int i = 0;
+        int i = 0;
+        const CANON_Device* cdev = NULL;
 	canon_sane_t *  handled = NULL;
 	CANON_Device dev;
 	CMT_Status status = CMT_STATUS_INVAL;
@@ -786,7 +788,15 @@ sane_open (SANE_String_Const name, SANE_Handle * h){
 		return show_sane_cmt_error(CMT_STATUS_INVAL);
 	}
 
-	status = CIJSC_open2((char*)name,&dev);
+	for(;i< count_canon_list;i++){
+		if (!strcmp(name, canon_list[i]->name)) {
+	           cdev = canon_list[i];
+		   break;
+		}
+	}
+	i = 0;
+	// status = CIJSC_open2((char*)name,&dev);
+	status = CIJSC_open((char*)name);
 	if(status != CMT_STATUS_GOOD){
 		return show_sane_cmt_error(status);
 	}
@@ -797,23 +807,30 @@ sane_open (SANE_String_Const name, SANE_Handle * h){
 		return show_sane_cmt_error(CMT_STATUS_NO_MEM);
 	}
 
-	handled->dev = dev;
-	handled->sources = (SANE_String_Const *)malloc(sizeof(SANE_String_Const) * 3);
-	for (i = 0; i < 3; i++)
-        handled->sources[i] = NULL;
-    i = 0;
-	if ( CIJSC_GET_SUPPORT_PLATEN( dev.type ) ) {
-		handled->sources[i] = (SANE_String_Const)strdup(scan_table[0]);
-		i++;
-	}
-	if ( CIJSC_GET_SUPPORT_ADF_S( dev.type ) ) {
-		handled->sources[i] = (SANE_String_Const)strdup(scan_table[1]);
-		i++;
-	}
-	if ( CIJSC_GET_SUPPORT_ADF_D( dev.type ) ) {
-		handled->sources[i] = (SANE_String_Const)strdup(scan_table[2]);
-		i++;
-	}
+	handled->dev = cdev;
+	handled->sources = NULL;//(SANE_String_Const *)malloc(sizeof(SANE_String_Const) * 3);
+        i = 0;
+        if ( CIJSC_GET_SUPPORT_PLATEN( cdev->type ) ) {
+                handled->sources = (SANE_String_Const *)malloc(sizeof(SANE_String_Const));
+                handled->sources[i] = (SANE_String_Const)strdup(FLATBED);
+                i++;
+        }
+        if ( CIJSC_GET_SUPPORT_ADF_S( cdev->type ) ) {
+                if (handled->sources == NULL)
+                    handled->sources = (SANE_String_Const *)malloc(sizeof(SANE_String_Const));
+                else
+                    handled->sources = (SANE_String_Const *)realloc(handled->sources, sizeof(SANE_String_Const)*(i + 1));
+                handled->sources[i] = (SANE_String_Const)strdup(ADF);
+                i++;
+        }
+        if ( CIJSC_GET_SUPPORT_ADF_D( cdev->type ) ) {
+                if (handled->sources == NULL)
+                    handled->sources = (SANE_String_Const *)malloc(sizeof(SANE_String_Const));
+                else
+                    handled->sources = (SANE_String_Const *)realloc(handled->sources, sizeof(SANE_String_Const)*(i + 1));
+                handled->sources[i] = (SANE_String_Const)strdup(ADF_DUPLEX);
+                i++;
+        }
 
 	status = init_options(handled);
 	if(status != CMT_STATUS_GOOD){
@@ -1078,7 +1095,7 @@ SCAN_START:
 	if(status  != CMT_STATUS_GOOD ){
 		handled->sgmp.last_error_quit = status;
 		/* ADF : check status. */
-		if ( param.ScanMethod != CIJSC_SCANMODE_PLATEN &&  status == CMT_STATUS_NO_DOCS ) {
+		if ( param.ScanMethod != CIJSC_SCANMODE_PLATEN &&  status == CMT_STATUS_NO_DOCS ) {  // CNMP_ST_NO_PAPER
 			/* no paper */
 			if( handled->sgmp.scanning_page == 1 ) {
 				CIJSC_UI_error_show( &(handled->sgmp) );
@@ -1097,7 +1114,7 @@ SCAN_START:
 				DBGMSG("CIJSC_cancel->\n");
 				CIJSC_cancel();
 				CIJSC_close();
-				CIJSC_open(handled->dev.name);
+				CIJSC_open(handled->dev->name);
 				return show_sane_cmt_error(CMT_STATUS_CANCELLED);
 			}
 		}
@@ -1110,8 +1127,7 @@ SCAN_START:
     if((status = CIJSC_get_parameters(NULL)) != CMT_STATUS_GOOD){
       return SANE_STATUS_UNSUPPORTED;
     }
-
-	return SANE_STATUS_GOOD;
+    return SANE_STATUS_GOOD;
 
 }
 
