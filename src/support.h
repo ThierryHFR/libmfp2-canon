@@ -132,7 +132,7 @@ enum{
 
 
 
-#define FLATBED "platen"
+#define FLATBED "Flatbed"
 #define ADF "ADF"
 #define ADF_DUPLEX "ADF Duplex"
 
