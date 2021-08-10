@@ -8,6 +8,7 @@
 #include "saneopts.h"
 #include "sanei.h"
 #include "sanei_backend.h"
+#include <unistd.h>
 #include <jpeglib.h>
 #include <setjmp.h>
 #include <unistd.h>
@@ -59,6 +60,8 @@ typedef struct Handled{
 	SANE_Bool write_scan_data;
 	SANE_Bool decompress_scan_data;
 	SANE_Bool end_read;
+        FILE *file;
+        SANE_Parameters ps;
 }  canon_sane_t;
 
 typedef struct {
@@ -407,9 +410,9 @@ CMT_Status canon_sane_decompress(canon_sane_t * handled,const char * filename)
 	struct my_error_mgr jerr;
 	FILE * src = NULL;
 	int lineSize;
-	src = fopen(filename,"rb");
-	unlink(filename);
-	start = ftell(src);
+        fseek(handled->file, 0, SEEK_SET );
+// 	handled->file = fopen(filename,"rb");
+	start = ftell(handled->file);
 
 
 	/* Create a decompression structure and load the JPEG header */
@@ -422,11 +425,13 @@ CMT_Status canon_sane_decompress(canon_sane_t * handled,const char * filename)
 		if ( surface != NULL ) {
 			free(surface);
 		}
+	        fclose(handled->file);
+                handled->file = NULL;
 		return show_canon_cmt_error(CMT_STATUS_INVAL);
 	}
 
 	jpeg_create_decompress(&cinfo);
-	jpeg_RW_src(&cinfo, src);
+	jpeg_RW_src(&cinfo, handled->file);
 	jpeg_read_header(&cinfo, TRUE);
 
 
@@ -439,7 +444,9 @@ CMT_Status canon_sane_decompress(canon_sane_t * handled,const char * filename)
 
 	if ( surface == NULL ) {
 		jpeg_destroy_decompress(&cinfo);
-		fseek(src, start, SEEK_SET);
+		fseek(handled->file, start, SEEK_SET);
+	        fclose(handled->file);
+                handled->file = NULL;
 		return show_canon_cmt_error(CMT_STATUS_NO_MEM);
 	}
 
@@ -456,7 +463,8 @@ CMT_Status canon_sane_decompress(canon_sane_t * handled,const char * filename)
 	handled->img_read = 0;
 	jpeg_finish_decompress(&cinfo);
 	jpeg_destroy_decompress(&cinfo);
-	fclose(src);
+	fclose(handled->file);
+        handled->file = NULL;
 	return CMT_STATUS_GOOD ;
 }
 
@@ -473,10 +481,13 @@ void backend_error(SGMP_Data_Lite * data ,int *errCode){
 	// delete scanned file.
 }
 
+static int numpagefile = 1;
+
 CMT_Status canon_sane_read(canon_sane_t * handled){
 
 	CMT_Status status = CMT_STATUS_GOOD;
 	unsigned char* buf  = NULL;
+        char tmpfile[PATH_MAX] = {0};
 	int readBytes = JPEGSCANBUFSIZE;
 	int len = 0;
 	FILE * file = NULL;
@@ -486,10 +497,12 @@ CMT_Status canon_sane_read(canon_sane_t * handled){
 	if(!buf){
 		return show_canon_cmt_error(CMT_STATUS_NO_MEM);
 	}
-
-	file = fopen(canonJpegDataTmp,"wb");
-
-	if(file == NULL){
+        snprintf(tmpfile, sizeof(tmpfile), "%s%d", canonJpegDataTmp, numpagefile);
+        numpagefile++;
+	// handled->file = fopen(canonJpegDataTmp,"w+b");
+	handled->file = fopen(tmpfile,"w+b");
+	// unlink(canonJpegDataTmp);
+	if(handled->file == NULL){
 		return show_canon_cmt_error(CMT_STATUS_INVAL);
 	}
 
@@ -498,15 +511,19 @@ CMT_Status canon_sane_read(canon_sane_t * handled){
 		len = 0;
 		readBytes = JPEGSCANBUFSIZE;
 		status = CIJSC_read(buf,&readBytes);
-		len = fwrite(buf,1,readBytes,file);
+		len = fwrite(buf,1,readBytes,handled->file);
 		total += len;
 	}
 	if(handled->cancel){
 		status = CMT_STATUS_CANCELLED;
 	}
-	fclose(file);
 	return status == CMT_STATUS_EOF ? CMT_STATUS_GOOD : status;
 }
+
+////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////
+
 
 SANE_Status
 sane_init (SANE_Int * version_code, SANE_Auth_Callback authorize)
@@ -815,25 +832,7 @@ sane_open (SANE_String_Const name, SANE_Handle * h){
 	if(!name){
 	     return show_sane_cmt_error(CMT_STATUS_INVAL);
 	}
-/*
-	for(;i< count_canon_list;i++){
-		if (!strcmp(name, canon_list[i]->name)) {
-	           cdev = (CANON_Device*)canon_list[i];
-                   fprintf(stderr, "Device found [%s]\n", canon_list[i]->name);
-                   fflush(stderr);
-		   break;
-		}
-	}
-	i = 0;
-*/
 	status = CIJSC_open2((char*)name,&dev);
-	/*if(cdev == NULL){
-                fprintf(stderr, "Device not found\n");
-                fflush(stderr);
-		return show_sane_cmt_error(CMT_STATUS_INVAL);
-	}
-	status = CIJSC_open((char*)name);
-        */
 	if(status != CMT_STATUS_GOOD){
 		return show_sane_cmt_error(status);
 	}
@@ -845,11 +844,6 @@ sane_open (SANE_String_Const name, SANE_Handle * h){
 	}
 
 	handled->dev = &dev;
-	/*
-        handled->sources = (SANE_String_Const *)malloc(sizeof(SANE_String_Const) * 4);
-        for (i = 0; i < 4; i++)
-                handled->sources[i] = NULL;
-        */
         i = 0;
         // if ( CIJSC_GET_SUPPORT_PLATEN( dev.type ) )
                 handled->sources = char_to_array(handled->sources, &i, (SANE_String_Const)FLATBED);
@@ -862,6 +856,18 @@ sane_open (SANE_String_Const name, SANE_Handle * h){
 	if(status != CMT_STATUS_GOOD){
 		return show_sane_cmt_error(status);
 	}
+        handled->ps.depth = 8;
+        handled->ps.last_frame = SANE_TRUE;
+        handled->ps.format = SANE_FRAME_RGB;
+        handled->ps.pixels_per_line = MM_TO_PIXEL(handled->val[OPT_BR_X].w, 300.0);
+        handled->ps.lines = MM_TO_PIXEL(handled->val[OPT_BR_Y].w, 300.0);
+        handled->ps.bytes_per_line = handled->ps.pixels_per_line * 3;
+        status = sane_get_parameters(handled, 0);
+        if (status != SANE_STATUS_GOOD) {
+            sane_close(handled);
+            free(handled);
+            return (status);
+        }
 	handled->cancel = SANE_FALSE;
 	handled->write_scan_data = SANE_FALSE;
 	handled->decompress_scan_data = SANE_FALSE;
@@ -872,14 +878,22 @@ sane_open (SANE_String_Const name, SANE_Handle * h){
 }
 
 void sane_cancel(SANE_Handle h){
-	canon_sane_t* handled = h;
-	handled->cancel = SANE_TRUE;
-	CIJSC_cancel();
+    canon_sane_t* handled = (canon_sane_t*)h;
+    if (handled->file)
+    {
+      fclose(handled->file);
+      handled->file = NULL;
+    }
+    handled->cancel = SANE_TRUE;
+    CIJSC_cancel();
 }
 
 void
 sane_close (SANE_Handle h){
 
+	canon_sane_t* handled = h;
+	handled->cancel = SANE_TRUE;
+	CIJSC_cancel();
 	CIJSC_close( );
 	if(h){
 		free(h);
@@ -1058,38 +1072,37 @@ sane_start (SANE_Handle h){
 	int errCode = 0;
 	canon_sane_t* handled = h;
 	CMT_Status status = CMT_STATUS_INVAL;
-	CANON_ScanParam param;
-	memset( &param, 0, sizeof(param) );
-
-
-	param.XRes			= handled->sgmp.scan_res;
-	param.YRes			= handled->sgmp.scan_res;
-	param.Left			= 0;
-	param.Top			= 0;
-	param.Right			= handled->sgmp.scan_w; // handled->sgmp.scan_wx;
-	param.Bottom			= handled->sgmp.scan_h; // handled->sgmp.scan_hy;
+        
+	// CANON_ScanParam param;
+	// if (handled->img_read == 0)
+        {
+            memset( &handled->param, 0, sizeof(handled->param));
+	    handled->param.XRes			= handled->sgmp.scan_res;
+	    handled->param.YRes			= handled->sgmp.scan_res;
+	    handled->param.Left			= 0;
+            handled->param.Top			= 0;
+	    handled->param.Right			= handled->sgmp.scan_w; // handled->sgmp.scan_wx;
+	    handled->param.Bottom			= handled->sgmp.scan_h; // handled->sgmp.scan_hy;
 fprintf(stderr, "Res User  : [%d]\n", handled->sgmp.scan_res);
 fprintf(stderr, "Format Max  : [0x0|%dx%d]\n", handled->sgmp.scan_w, handled->sgmp.scan_h);
 fprintf(stderr, "Format User : [%dx%d|%dx%d]\n", handled->sgmp.scan_x, handled->sgmp.scan_y, handled->sgmp.scan_wx, handled->sgmp.scan_hy);
-	param.ScanMode			= ( handled->sgmp.scan_color == CIJSC_COLOR_COLOR ) ? 4 : 2;
-	param.ScanMethod		= (handled->sgmp.scan_scanmode == CIJSC_SCANMODE_ADF_D_S ) ? CIJSC_SCANMODE_ADF_D_L : handled->sgmp.scan_scanmode;
+	    handled->param.ScanMode			= ( handled->sgmp.scan_color == CIJSC_COLOR_COLOR ) ? 4 : 2;
+	    handled->param.ScanMethod		= (handled->sgmp.scan_scanmode == CIJSC_SCANMODE_ADF_D_S ) ? CIJSC_SCANMODE_ADF_D_L : handled->sgmp.scan_scanmode;
 fprintf(stderr, "Scan Methode : [%s]\n", scan_table[handled->sgmp.scan_scanmode]);
-	param.opts.p1_0			= 0;
-	param.opts.p2_0			= 0;
-	param.opts.p3_3			= 3;
-	param.opts.DocumentType		= handled->sgmp.scan_source + 1;
-	param.opts.p4_0			= 0;
-	param.opts.p5_0			= 0;
-	param.opts.p6_1			= 1;
-
-	handled->param = param;
-
-
+            handled->param.opts.DocumentType		= handled->sgmp.scan_source + 1;
+            handled->param.opts.p1_0         = 0;
+            handled->param.opts.p2_0         = 0;
+            handled->param.opts.p3_3         = 3;
+            handled->param.opts.p4_0         = 0;
+            handled->param.opts.p5_0         = 0;
+            handled->param.opts.p6_1         = 1;
+        }
 	handled->cancel = SANE_FALSE;
 	handled->write_scan_data = SANE_FALSE;
 	handled->decompress_scan_data = SANE_FALSE;
 	handled->end_read = SANE_FALSE;
-	handled->img_read = 0 ;
+	handled->img_read = 0;
+        handled->img_data = NULL;
 
 /*
 	param.XRes			= data->scan_res = 300;
@@ -1117,33 +1130,35 @@ fprintf(stderr, "Scan Methode : [%s]\n", scan_table[handled->sgmp.scan_scanmode]
 
 SCAN_START:
 		/* scan start*/
-	status = CIJSC_start( &param );
-        if (status == CMT_STATUS_NO_DOCS)
-		return SANE_STATUS_CANCELLED;
+	status = CIJSC_start( &handled->param );
+        /*if (status == CMT_STATUS_NO_DOCS)
+		return SANE_STATUS_CANCELLED;*/
 	if(status  != CMT_STATUS_GOOD ){
 		handled->sgmp.last_error_quit = status;
 		/* ADF : check status. */
-		if ( param.ScanMethod != CIJSC_SCANMODE_PLATEN &&  status == CMT_STATUS_NO_DOCS ) {  // CNMP_ST_NO_PAPER
+		if ( handled->param.ScanMethod != CIJSC_SCANMODE_PLATEN &&  status == CMT_STATUS_NO_DOCS ) {  // CNMP_ST_NO_PAPER
 			/* no paper */
 			if( handled->sgmp.scanning_page == 1 ) {
 				CIJSC_UI_error_show( &(handled->sgmp) );
-				if(handled->sgmp.last_error_quit == CIJSC_VALUE_OK){
+				/*if(handled->sgmp.last_error_quit == CIJSC_VALUE_OK){
 					goto SCAN_START;
 				}
-				else {
+				else*/ {
 					/* scan canceled.*/
 					/* delete disused file. */
 					DBGMSG("CIJSC_cancel->\n");
 					CIJSC_cancel();
-				return show_sane_cmt_error(CMT_STATUS_NO_DOCS);
+				        CIJSC_close();
+				        return show_sane_cmt_error(CMT_STATUS_NO_DOCS);
 				}
 			}else {
 				/* delete disused file.*/
 				DBGMSG("CIJSC_cancel->\n");
 				CIJSC_cancel();
 				CIJSC_close();
-				CIJSC_open(handled->dev->name);
-				return show_sane_cmt_error(CMT_STATUS_CANCELLED);
+				// CIJSC_open(handled->dev->name);
+				return show_sane_cmt_error(CMT_STATUS_NO_DOCS);
+				// return show_sane_cmt_error(CMT_STATUS_CANCELLED);
 			}
 		}
 		DBGMSG("Error in CIJSC_start \n");
@@ -1152,97 +1167,98 @@ SCAN_START:
 	}
 
     /* get parameters */
-    if((status = CIJSC_get_parameters(NULL)) != CMT_STATUS_GOOD){
+   if((status = CIJSC_get_parameters(NULL)) != CMT_STATUS_GOOD){
       return SANE_STATUS_UNSUPPORTED;
-    }
-    return SANE_STATUS_GOOD;
+   }
 
+   status = canon_sane_read(handled);
+   if(status != CMT_STATUS_GOOD)
+       return show_sane_cmt_error(status);
+   status = canon_sane_decompress(handled, canonJpegDataTmp);
+   if(status != CMT_STATUS_GOOD)
+       return show_sane_cmt_error(status);
+   handled->ps.depth = 8;
+   handled->ps.pixels_per_line = handled->sgmp.scan_wx;
+   handled->ps.lines = handled->sgmp.scan_hy;
+   handled->ps.bytes_per_line = handled->ps.pixels_per_line * 3;
+   handled->ps.last_frame = SANE_TRUE;
+   handled->ps.format = SANE_FRAME_RGB;
+
+   return SANE_STATUS_GOOD;
 }
 
 SANE_Status
 sane_get_parameters (SANE_Handle h, SANE_Parameters * p)//voir avec CIJSC_get_parameters
 {
+   canon_sane_t* handled = h;
+   SANE_Status status = SANE_STATUS_GOOD;
 
-	canon_sane_t* handled = h;
-	SANE_Parameters ps;
-
-	ps.depth = 8;//8
-	ps.last_frame = (handled->sgmp.scan_scanmode == CIJSC_SCANMODE_PLATEN ? SANE_TRUE : SANE_FALSE);
-	ps.format = SANE_FRAME_RGB;
-    	ps.pixels_per_line = handled->sgmp.scan_wx;
-    	ps.lines = handled->sgmp.scan_hy;
-    	ps.bytes_per_line = ps.pixels_per_line*3;
-	*p = ps;
-
-	return SANE_STATUS_GOOD;
+   if (status != SANE_STATUS_GOOD)
+       return (status);
+   if (p != NULL) {
+       p->depth = 8;
+       p->last_frame = handled->ps.last_frame;
+       p->format = SANE_FRAME_RGB;
+       p->pixels_per_line = handled->ps.pixels_per_line;
+       p->lines = handled->ps.lines;
+       p->bytes_per_line = handled->ps.bytes_per_line;
+   }
+   return (status);
 }
 
 SANE_Status
 sane_read (SANE_Handle h, SANE_Byte * buf, SANE_Int maxlen, SANE_Int * len){
-	canon_sane_t * handled = h;
-	CMT_Status status = CMT_STATUS_GOOD;
-	long readbyte;
+    canon_sane_t * handled = h;
+    CMT_Status status = CMT_STATUS_GOOD;
+    long readbyte;
 
-	if(!handled|!buf|!len){
-			return show_sane_cmt_error(CMT_STATUS_INVAL);
-	}
-	if(handled->cancel){
-			return show_sane_cmt_error(CMT_STATUS_CANCELLED);
-	}
-	//lire toute les donnée du scanner les placé dans un fichier tmp
-	if(!handled->write_scan_data){
-		/*Get the jpeg image from the CANON's scanner
-		 *the image always has 3 components.
-		 *it will gray if the choosen mode is grayscale
-		 */
-		status = canon_sane_read(handled);
-		if(status != CMT_STATUS_GOOD){
-			return show_sane_cmt_error(status);
-		}
-		handled->write_scan_data = SANE_TRUE;
-	}
+    if(!handled|!buf|!len){
+	return show_sane_cmt_error(CMT_STATUS_INVAL);
+    }
+    if(handled->cancel){
+	return show_sane_cmt_error(CMT_STATUS_CANCELLED);
+    }
+    if (!handled->write_scan_data)
+        handled->write_scan_data = SANE_TRUE;
+    if (!handled->decompress_scan_data) {
+        if (status != SANE_STATUS_GOOD)
+            return (status);
+        handled->decompress_scan_data = SANE_TRUE;
+    }
+    if (handled->img_data == NULL)
+            return (SANE_STATUS_INVAL);
+///////////////////////////////////////////////////////////////////////////////////////////////
 
-
-	if(!handled->decompress_scan_data){
-		/*Read the jpeg file and put the raw image in a buffer*/
-		status = canon_sane_decompress(handled, canonJpegDataTmp);
-		if(status != CMT_STATUS_GOOD){
-			return show_sane_cmt_error(status);
-		}
-
-		handled->decompress_scan_data = SANE_TRUE;
-	}
-	if(handled->img_data == NULL){
-			return show_sane_cmt_error(CMT_STATUS_INVAL);
-	}
-
-	if(!handled->end_read){
-		/*read one scanline*/
-		readbyte = min((handled->img_size - handled->img_read), maxlen);
-		memcpy(buf,handled->img_data+handled->img_read,readbyte);
-		handled->img_read += readbyte;
-		*len = readbyte;
-		if(handled->img_read == handled->img_size){
-		/*if len > 0 and we are at end of file we need to do one more iteration to the total read bytes number*/
-			handled->end_read = SANE_TRUE;
-		}
-		else if(handled->img_read > handled->img_size){
-			/*if their is an error*/
-			*len = 0;
-			handled->end_read = SANE_TRUE;
-			free(handled->img_data);
-			handled->img_data = NULL;
-			return show_sane_cmt_error(CMT_STATUS_INVAL);
-		}
-	}
-	else{
-		/*we need to have *len == 0 if status != SANE_STATUS_EOF*/
-		*len = 0;
-		free(handled->img_data);
-		handled->img_data = NULL;
-		return SANE_STATUS_EOF;
-	}
-	return SANE_STATUS_GOOD;
+    if (!handled->end_read) {
+        // readbyte = min((handler->scanner->img_size - handler->scanner->img_read), maxlen);
+	readbyte = min((handled->img_size - handled->img_read), maxlen);
+        // memcpy(buf, handler->scanner->img_data + handler->scanner->img_read, readbyte);
+	memcpy(buf,handled->img_data+handled->img_read,readbyte);
+        // handler->scanner->img_read = handler->scanner->img_read + readbyte;
+        handled->img_read += readbyte;
+        *len = readbyte;
+        if (handled->img_read == handled->img_size)
+            handled->end_read = SANE_TRUE;
+        else if (handled->img_read > handled->img_size) {
+            *len = 0;
+	    handled->end_read = SANE_TRUE;
+	    free(handled->img_data);
+	    handled->img_data = NULL;
+	    return show_sane_cmt_error(CMT_STATUS_INVAL);
+        }
+    }
+    else {
+        SANE_Status job = SANE_STATUS_UNSUPPORTED;
+        *len = 0;
+        free(handled->img_data);
+        handled->img_data = NULL;
+        /*if (handled->sgmp.scan_scanmode != CIJSC_SCANMODE_PLATEN) {
+          handled->ps.last_frame = SANE_FALSE;
+        }
+        */
+        return SANE_STATUS_EOF;
+    }
+    return (SANE_STATUS_GOOD);
 }
 
 SANE_Status

@@ -58,7 +58,7 @@
 #endif
 
 
-#define	_SGMP_DEBUG
+// #define	_SGMP_DEBUG
 #define	_SGMP_DEBUG_VERBOSE_
 
 
@@ -132,7 +132,7 @@ enum{
 
 
 
-#define FLATBED "platen"
+#define FLATBED "Flatbed"
 #define ADF "ADF"
 #define ADF_DUPLEX "ADF Duplex"
 
