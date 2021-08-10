@@ -14,11 +14,13 @@ Sane backend 'canon_pixma' for CANON's scanners
 	We separated the code from the backend, to make it a library with only free code.
 
 	This library is dependent on the scangearmp2 package provided by Canon.
-	The current version is 3.70, the list of scanners supported is below.
+	The current version is 4.20, the list of scanners supported is below.
 	You can download the archive that contains the 32/64 bit driver here:
-	  http://gdlp01.c-wss.com/gds/5/0100010485/01/scangearmp2-3.90-1-deb.tar.gz
+	  https://gdlp01.c-wss.com/gds/8/0100011058/01/scangearmp2-4.20-1-deb.tar.gz
 	  or
-	  http://gdlp01.c-wss.com/gds/6/0100010486/01/scangearmp2-3.90-1-rpm.tar.gz
+	  https://gdlp01.c-wss.com/gds/9/0100011059/01/scangearmp2-4.20-1-rpm.tar.gz
+	  or
+	  https://gdlp01.c-wss.com/gds/0/0100011060/01/scangearmp2-source-4.20-1.tar.gz
        
 ```
 ## Add 2018
@@ -76,6 +78,7 @@ MB5000 series
 MB5300 series
 E460 series
 
+MX455 series
 MX490 series
 E480 series
 
@@ -115,6 +118,37 @@ XK60 series
 TS6330 series
 TS3300 series
 E3300 series
+
+
+#Add 2020
+G7000 series
+G7080 series
+GM4000 series
+GM4080 series
+
+
+#Add Dec 2020
+TS3400 series
+E3400 series
+TR7000 series
+G2020 series
+G3060 series
+G2060 series
+G3020 series
+TS7430 series
+XK90 series
+TS8430 series
+TR7600 series
+TR8600 series
+TR8630 series
+TS6400 series
+TS7400 series
+
+
+#Add Dec 2021
+GX6000 series
+GX7000 series
+TS5400 series
 ```
 # ADVANTAGES
 
@@ -122,7 +156,7 @@ Better image quality than 'pixma' backend (with an output image size of 2480x350
 
 # STATE
 
-Tested with sane 1.0.25 and 1.0.27 (may not work for lower versions)
+Tested with sane 1.0.25 and 1.0.32 (may not work for lower versions)
 Currently the backend allow image in A4 format.
 The scan works in color or in gray map.
 The options are not well handled, so they might not work.
