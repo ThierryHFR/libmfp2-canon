@@ -157,11 +157,13 @@ Better image quality than 'pixma' backend (with an output image size of 2480x350
 # STATE
 
 Tested with sane 1.0.25 and 1.0.32 (may not work for lower versions)
-Currently the backend allow image in A4 format.
+In Platen, the backend recognizes CARD, L_L, L_P, 4X6_L, 4X6_P, HAGAKI_L, HAGAKI_P, 2L_L, 2L_P, A5, B5, A4 and LETTER formats.
+In ADF, the backend recognizes A4 and LETTER formats.
 The scan works in color or in gray map.
 The options are not well handled, so they might not work.
 The color option allow to chose between color or graymap modes.
-The resolution option allow to have a hight or low quality for the output.
+The resolution option allow to have a 75, 150, 300 or 600 quality for the output.
+The source option allow to chose between Platen, ADF and ADF Duplex, i don't have a means of detection, so it depends on the hardware.
 
 # KNOWN PROBLEMS
 
@@ -186,10 +188,10 @@ apt-get install debhelper libusb-1.0-0-dev libtool-bin libjpeg-dev
 # or, if failure, use:
 apt-get install debhelper libusb-1.0-0-dev libtool libjpeg-dev
 cd /tmp
-wget http://gdlp01.c-wss.com/gds/1/0100009931/01/scangearmp2-3.70-1-deb.tar.gz
-tar xvf scangearmp2-3.70-1-deb.tar.gz
+wget https://gdlp01.c-wss.com/gds/8/0100011058/01/scangearmp2-4.20-1-deb.tar.gz
+tar xvf scangearmp2-4.20-1-deb.tar.gz
 arch="$(if [[ "$(uname -p)" = "x86_64" ]] ; then echo "amd64"; else echo "i386"; fi)"
-dpkg -i scangearmp2-3.70-1-deb/packages/scangearmp2_3.70-1_${arch}.deb
+dpkg -i scangearmp2-4.20-1-deb/packages/scangearmp2_4.20-1_${arch}.deb
 cd -
 ```
 ###### Build Sources :
@@ -225,10 +227,10 @@ rm -rf libmfp2-canon-0.1
 ###### Get developement environnement :
 ```
 cd /tmp
-wget http://gdlp01.c-wss.com/gds/2/0100009932/01/scangearmp2-3.70-1-rpm.tar.gz
-tar xvf scangearmp2-3.70-1-rpm.tar.gz
-rpm -ivh scangearmp2-3.70-1-rpm/packages/scangearmp2-3.70-1.$(uname -p).rpm
-rm -rf scangearmp2-3.70-1-rpm
+wget http://gdlp01.c-wss.com/gds/2/0100009932/01/scangearmp2-4.20-1-rpm.tar.gz
+tar xvf scangearmp2-4.20-1-rpm.tar.gz
+rpm -ivh scangearmp2-4.20-1-rpm/packages/scangearmp2-4.20-1.$(uname -p).rpm
+rm -rf scangearmp2-4.20-1-rpm
 yum install gcc make libjpeg-turbo-devel libusbx-devel libtool automake autoconf
 ```
 ###### Build Sources :
