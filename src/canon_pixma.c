@@ -4,9 +4,11 @@
 
 #define _GNU_SOURCE
 #include "canon_pixma.h"
-#include "sane.h"
-#include "saneopts.h"
-#include "sanei.h"
+#include <sane/sane.h>
+#include <sane/saneopts.h>
+#ifdef NDEBUG
+#undef NDEBUG
+#endif
 #include "sanei_backend.h"
 #include <unistd.h>
 #include <jpeglib.h>
@@ -34,8 +36,8 @@ static void jpeg_RW_src (j_decompress_ptr, FILE *);
 static void my_error_exit(j_common_ptr);
 static void output_no_message(j_common_ptr);
 
-static const char vendor_str[] = "CANON";
-static const char type_str[] = "multi-function peripheral";
+// static const char vendor_str[] = "CANON";
+// static const char type_str[] = "multi-function peripheral";
 
 static const CANON_Device ** canon_list = NULL;
 static int count_canon_list = 0;
@@ -177,7 +179,7 @@ static const SANE_String_Const scan_table[] = {
 
 static const SANE_Int resbit_list[] =
 {
-	1, 300
+	4, 75, 150, 300, 600
 };
 
 const char *canonJpegDataTmp = "/tmp/jpeg_canon.tmp";
@@ -408,8 +410,8 @@ CMT_Status canon_sane_decompress(canon_sane_t * handled,const char * filename)
 	JSAMPROW rowptr[1];
 	unsigned char * surface = NULL;
 	struct my_error_mgr jerr;
-	FILE * src = NULL;
 	int lineSize;
+	(void)filename;
         fseek(handled->file, 0, SEEK_SET );
 // 	handled->file = fopen(filename,"rb");
 	start = ftell(handled->file);
@@ -481,30 +483,24 @@ void backend_error(SGMP_Data_Lite * data ,int *errCode){
 	// delete scanned file.
 }
 
-static int numpagefile = 1;
 
 CMT_Status canon_sane_read(canon_sane_t * handled){
 
 	CMT_Status status = CMT_STATUS_GOOD;
 	unsigned char* buf  = NULL;
-        char tmpfile[PATH_MAX] = {0};
 	int readBytes = JPEGSCANBUFSIZE;
 	int len = 0;
-	FILE * file = NULL;
 	int total =0;
 	buf = (unsigned char *)calloc(JPEGSCANBUFSIZE,1);
 
 	if(!buf){
 		return show_canon_cmt_error(CMT_STATUS_NO_MEM);
 	}
-        snprintf(tmpfile, sizeof(tmpfile), "%s%d", canonJpegDataTmp, numpagefile);
-        numpagefile++;
-	// handled->file = fopen(canonJpegDataTmp,"w+b");
-	handled->file = fopen(tmpfile,"w+b");
-	// unlink(canonJpegDataTmp);
+	handled->file = fopen(canonJpegDataTmp,"w+b");
 	if(handled->file == NULL){
 		return show_canon_cmt_error(CMT_STATUS_INVAL);
 	}
+        unlink(canonJpegDataTmp);
 
 	while(status == CMT_STATUS_GOOD && !handled->cancel){
 		/*Read data from the scanner, the data are send in jpeg format*/
@@ -519,11 +515,6 @@ CMT_Status canon_sane_read(canon_sane_t * handled){
 	}
 	return status == CMT_STATUS_EOF ? CMT_STATUS_GOOD : status;
 }
-
-////////////////////////////////////////////////////////////////////
-
-////////////////////////////////////////////////////////////////////
-
 
 SANE_Status
 sane_init (SANE_Int * version_code, SANE_Auth_Callback authorize)
@@ -717,7 +708,7 @@ init_options (canon_sane_t * s)
 	/* TODO: Build the constraints on resolution in a smart way */
 	s->opt[OPT_RESOLUTION].constraint_type = SANE_CONSTRAINT_WORD_LIST;
 	s->opt[OPT_RESOLUTION].constraint.word_list = resbit_list;
-	s->val[OPT_RESOLUTION].w = s->sgmp.scan_res = resbit_list[1];
+	s->val[OPT_RESOLUTION].w = s->sgmp.scan_res = resbit_list[3];
 
 	s->opt[OPT_PREVIEW].name = SANE_NAME_PREVIEW;
 	s->opt[OPT_PREVIEW].title = SANE_TITLE_PREVIEW;
@@ -803,7 +794,6 @@ char_to_array(SANE_String_Const *tab, int *tabsize, SANE_String_Const mode)
 {
      SANE_String_Const *board = NULL;
      int i = 0;
-     SANE_String_Const convert = NULL;
      if (mode == NULL)
          return (tab);
      for (i = 0; i < (*tabsize); i++)
@@ -862,11 +852,11 @@ sane_open (SANE_String_Const name, SANE_Handle * h){
         handled->ps.pixels_per_line = MM_TO_PIXEL(handled->val[OPT_BR_X].w, 300.0);
         handled->ps.lines = MM_TO_PIXEL(handled->val[OPT_BR_Y].w, 300.0);
         handled->ps.bytes_per_line = handled->ps.pixels_per_line * 3;
-        status = sane_get_parameters(handled, 0);
-        if (status != SANE_STATUS_GOOD) {
+        status = (CMT_Status)sane_get_parameters(handled, 0);
+        if (status != CMT_STATUS_GOOD) {
             sane_close(handled);
             free(handled);
-            return (status);
+            return (SANE_Status)(status);
         }
 	handled->cancel = SANE_FALSE;
 	handled->write_scan_data = SANE_FALSE;
@@ -952,7 +942,6 @@ sane_control_option (SANE_Handle h, SANE_Int n,
 				break;
             		case OPT_MODE:
 			case OPT_SCAN_SOURCE:
-                		DBGMSG("%d=[%s]\n", n, handled->val[n].s);
                 		strcpy (v, handled->val[n].s);
               			break;
             		case OPT_MODE_GROUP:
@@ -973,63 +962,43 @@ sane_control_option (SANE_Handle h, SANE_Int n,
                                 break;
 			case OPT_BR_X:
 			   	handled->val[n].w = *(SANE_Word *) v;
-                if (handled->sgmp.scan_scanmode == CIJSC_SCANMODE_PLATEN)
-                     size = _get_source_size(MM_TO_PIXEL(handled->val[n].w, 300), -1);
-                else
-                     size = _get_source_adf_size(MM_TO_PIXEL(handled->val[n].w, 300), -1);
-                handled->sgmp.scan_wx = size.right * (handled->sgmp.scan_res == 300 ? 1 : 2);
-                handled->sgmp.scan_hy = size.bottom * (handled->sgmp.scan_res == 300 ? 1 : 2);
-			    handled->sgmp.scan_w = size.right;
-			    handled->sgmp.scan_h = size.bottom;
-                handled->val[n].w = PIXEL_TO_MM(size.right, 300);
-                handled->val[OPT_BR_Y].w = PIXEL_TO_MM(size.bottom, 300);
+                                if (handled->sgmp.scan_scanmode == CIJSC_SCANMODE_PLATEN)
+                                    size = _get_source_size(MM_TO_PIXEL(handled->val[n].w, 300), -1);
+                                else
+                                    size = _get_source_adf_size(MM_TO_PIXEL(handled->val[n].w, 300), -1);
+			        handled->sgmp.scan_w = size.right;
+			        handled->sgmp.scan_h = size.bottom;
+                                handled->val[n].w = PIXEL_TO_MM(size.right, 300);
+                                handled->val[OPT_BR_Y].w = PIXEL_TO_MM(size.bottom, 300);
 			   	if(i){
 			     		*i |= SANE_INFO_RELOAD_PARAMS | SANE_INFO_RELOAD_OPTIONS | SANE_INFO_INEXACT;
 			   	}
 			   	break;
 			case OPT_BR_Y:
 			   	handled->val[n].w = *(SANE_Word *) v;
-                if (handled->sgmp.scan_scanmode == CIJSC_SCANMODE_PLATEN)
-                   size = _get_source_size(-1, MM_TO_PIXEL(handled->val[n].w, 300));
-                else
-                   size = _get_source_adf_size(-1, MM_TO_PIXEL(handled->val[n].w, 300));
-                handled->sgmp.scan_wx = size.right * (handled->sgmp.scan_res == 300 ? 1 : 2);
-                handled->sgmp.scan_hy = size.bottom * (handled->sgmp.scan_res == 300 ? 1 : 2);
-			    handled->sgmp.scan_w = size.right;
-			    handled->sgmp.scan_h = size.bottom;
-                handled->val[n].w = PIXEL_TO_MM(size.bottom, 300);
-                handled->val[OPT_BR_X].w = PIXEL_TO_MM(size.right, 300);
+                                if (handled->sgmp.scan_scanmode == CIJSC_SCANMODE_PLATEN)
+                                   size = _get_source_size(-1, MM_TO_PIXEL(handled->val[n].w, 300));
+                                else
+                                   size = _get_source_adf_size(-1, MM_TO_PIXEL(handled->val[n].w, 300));
+			        handled->sgmp.scan_w = size.right;
+			        handled->sgmp.scan_h = size.bottom;
+                                handled->val[n].w = PIXEL_TO_MM(size.bottom, 300);
+                                handled->val[OPT_BR_X].w = PIXEL_TO_MM(size.right, 300);
 			   	if(i){
 			     		*i |= SANE_INFO_RELOAD_PARAMS | SANE_INFO_RELOAD_OPTIONS | SANE_INFO_INEXACT;
 			   	}
 			   	break;
 			case OPT_PREVIEW:
 			   	handled->val[n].w = *(SANE_Word *) v;
-			      	if (handled->val[OPT_RESOLUTION].w == 600) {
-			      	    handled->val[OPT_RESOLUTION].w = 300;
-			      	    handled->sgmp.scan_res = 300 ;
-			      	    handled->sgmp.scan_hy = handled->sgmp.scan_h;
-			      	    handled->sgmp.scan_wx = handled->sgmp.scan_w;
-                                    handled->val[OPT_BR_X].w = PIXEL_TO_MM(handled->sgmp.scan_wx, 300);
-                                    handled->val[OPT_BR_Y].w = PIXEL_TO_MM(handled->sgmp.scan_hy, 300);
-                                }
+			      	handled->sgmp.scan_res = 75 ;
 			   	if(i){
 			     		*i |= SANE_INFO_RELOAD_PARAMS | SANE_INFO_RELOAD_OPTIONS | SANE_INFO_INEXACT;
 			   	}
 			   	break;
 			case OPT_RESOLUTION:
 			      	v1 = (int)*(SANE_Word*)v;
-                              	v1 = 300; //_get_resolution(v1);
 			      	handled->sgmp.scan_res = v1 ;
 			      	handled->val[n].w = v1;
-                                if (v1 == 300) {
-                                      handled->sgmp.scan_wx = handled->sgmp.scan_w;
-			              handled->sgmp.scan_hy = handled->sgmp.scan_h;
-                                }
-                                else {
-                                      handled->sgmp.scan_wx = handled->sgmp.scan_w * 2;
-			              handled->sgmp.scan_hy = handled->sgmp.scan_h * 2;
-                                }
                                 fprintf(stderr, "RESOLUTION : [%d]\n", handled->sgmp.scan_res);
 			      	if(i){
 			        	*i |= SANE_INFO_RELOAD_PARAMS | SANE_INFO_RELOAD_OPTIONS | SANE_INFO_INEXACT;
@@ -1065,6 +1034,29 @@ sane_control_option (SANE_Handle h, SANE_Int n,
 }
 
 
+static double table_res_fact[] = {4.0, 2.0, 1.0, 0.5};
+
+static int
+get_resolution(int val)
+{
+   int resol;
+   switch(val)
+   {
+      case 75:
+        resol = 0;
+        break;
+      case 150:
+        resol = 1;
+        break;
+      case 600:
+        resol = 3;
+        break;
+      default:
+        resol = 2;
+        break;
+   }
+   return resol;
+}
 
 
 SANE_Status
@@ -1076,16 +1068,17 @@ sane_start (SANE_Handle h){
 	// CANON_ScanParam param;
 	// if (handled->img_read == 0)
         {
+            int resol_prefered = get_resolution (handled->sgmp.scan_res);
             memset( &handled->param, 0, sizeof(handled->param));
 	    handled->param.XRes			= handled->sgmp.scan_res;
 	    handled->param.YRes			= handled->sgmp.scan_res;
 	    handled->param.Left			= 0;
             handled->param.Top			= 0;
-	    handled->param.Right			= handled->sgmp.scan_w; // handled->sgmp.scan_wx;
-	    handled->param.Bottom			= handled->sgmp.scan_h; // handled->sgmp.scan_hy;
+	    handled->param.Right			= handled->sgmp.scan_wx = (int) ((double)handled->sgmp.scan_w / table_res_fact[resol_prefered]); // handled->sgmp.scan_wx;
+	    handled->param.Bottom			= handled->sgmp.scan_hy = (int) ((double)handled->sgmp.scan_h / table_res_fact[resol_prefered]); // handled->sgmp.scan_hy;
 fprintf(stderr, "Res User  : [%d]\n", handled->sgmp.scan_res);
 fprintf(stderr, "Format Max  : [0x0|%dx%d]\n", handled->sgmp.scan_w, handled->sgmp.scan_h);
-fprintf(stderr, "Format User : [%dx%d|%dx%d]\n", handled->sgmp.scan_x, handled->sgmp.scan_y, handled->sgmp.scan_wx, handled->sgmp.scan_hy);
+fprintf(stderr, "Format User : [%dx%d|%dx%d]\n", handled->sgmp.scan_x, handled->sgmp.scan_y, handled->param.Right, handled->param.Bottom);
 	    handled->param.ScanMode			= ( handled->sgmp.scan_color == CIJSC_COLOR_COLOR ) ? 4 : 2;
 	    handled->param.ScanMethod		= (handled->sgmp.scan_scanmode == CIJSC_SCANMODE_ADF_D_S ) ? CIJSC_SCANMODE_ADF_D_L : handled->sgmp.scan_scanmode;
 fprintf(stderr, "Scan Methode : [%s]\n", scan_table[handled->sgmp.scan_scanmode]);
@@ -1128,7 +1121,7 @@ fprintf(stderr, "Scan Methode : [%s]\n", scan_table[handled->sgmp.scan_scanmode]
 	data->last_error_quit = CIJSC_ERROR_DLG_QUIT_FALSE;
  */
 
-SCAN_START:
+// SCAN_START:
 		/* scan start*/
 	status = CIJSC_start( &handled->param );
         /*if (status == CMT_STATUS_NO_DOCS)
@@ -1221,8 +1214,8 @@ sane_read (SANE_Handle h, SANE_Byte * buf, SANE_Int maxlen, SANE_Int * len){
     if (!handled->write_scan_data)
         handled->write_scan_data = SANE_TRUE;
     if (!handled->decompress_scan_data) {
-        if (status != SANE_STATUS_GOOD)
-            return (status);
+        if (status != CMT_STATUS_GOOD)
+            return (SANE_Status)(status);
         handled->decompress_scan_data = SANE_TRUE;
     }
     if (handled->img_data == NULL)
@@ -1248,7 +1241,6 @@ sane_read (SANE_Handle h, SANE_Byte * buf, SANE_Int maxlen, SANE_Int * len){
         }
     }
     else {
-        SANE_Status job = SANE_STATUS_UNSUPPORTED;
         *len = 0;
         free(handled->img_data);
         handled->img_data = NULL;
