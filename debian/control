@@ -2,11 +2,13 @@ Source: libmfp2-canon
 Section: graphics
 Priority: optional
 Maintainer: Thierry HUCHARD <thierry@ordissimo.com>
-Build-Depends: debhelper (>= 4.0.0), libglib2.0-dev, libusb-1.0-0-dev, libtool-bin | libtool, libjpeg-dev, scangearmp2
+Build-Depends: debhelper (>= 4.0.0), autotools-dev, libglib2.0-dev, libusb-1.0-0-dev,
+ libtool-bin, libjpeg-dev, libcanon-proprio-bin (>= 0.3+4.20) | scangearmp2 (>= 4.20), libsane-dev, autoconf, cmake,
+ gawk, automake
 Standards-Version: 3.7.2
 
 Package: libmfp2-canon
 Architecture: amd64 i386
-Depends: scangearmp2, ${shlibs:Depends}, ${misc:Depends}
+Depends: scangearmp2 (>= 4.20)|  libcanon-proprio-bin (>= 0.3+4.10), ${shlibs:Depends}, ${misc:Depends}
 Description: ScanGear MP for Linux.
  This ScanGear MP provides scanning functions for Canon Multifunction Inkjet Printer.

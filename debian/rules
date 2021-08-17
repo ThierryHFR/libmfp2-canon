@@ -1,7 +1,5 @@
 #!/usr/bin/make -f
 
 %:
-	dh $@ --with autoreconf
+	dh $@
 
-override_dh_autoreconf:
-	autoreconf -vf
