@@ -1,4 +1,4 @@
-libmfp2-canon (0.1+1604ubuntu1) xenial; urgency=medium
+libmfp2-canon (0.2+2104ubuntu1) hirsute; urgency=medium
 
   * Use cmake for packaging
 
