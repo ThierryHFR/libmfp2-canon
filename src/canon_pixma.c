@@ -523,6 +523,7 @@ sane_init (SANE_Int * version_code, SANE_Auth_Callback authorize)
 	CNMSInt32 cnms_status = CNMS_NO_ERR;
 
 	UNUSED (authorize);
+        DBG_INIT();
 
 	if (version_code != NULL)
 		*version_code = SANE_VERSION_CODE(1, 0, 0);
