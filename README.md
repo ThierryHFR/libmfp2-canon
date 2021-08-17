@@ -13,7 +13,9 @@ Sane backend 'canon_pixma' for CANON's scanners
 
 	We separated the code from the backend, to make it a library with only free code.
 
-	This library is dependent on the scangearmp2 package provided by Canon.
+	This library is dependent on the libcanon-proprio-bin :
+	  https://github.com/Ordissimo/libcanon-proprio-bin
+	Or scangearmp2 package provided by Canon :
 	The current version is 4.20, the list of scanners supported is below.
 	You can download the archive that contains the 32/64 bit driver here:
 	  https://gdlp01.c-wss.com/gds/8/0100011058/01/scangearmp2-4.20-1-deb.tar.gz
