@@ -19,8 +19,12 @@ else(DEBUG)
   target_compile_options(sane-canon_pixma PRIVATE "-O2")
 endif(DEBUG)
 
-target_include_directories(sane-canon_pixma PRIVATE ${GLIB_INCLUDE_DIR} ${JPEG_INCLUDE_DIR} ${LIBUSB_INCLUDE_DIRS} ${SANE_INCLUDE_DIRS} ../include )
-target_link_libraries(sane-canon_pixma pthread ${GLIB_LIBRARY} ${JPEG_LIBRARY} ${LIBUSB_LIBRARIES})
+target_include_directories(sane-canon_pixma PRIVATE ${JPEG_INCLUDE_DIR} ${LIBUSB_INCLUDE_DIRS} ${SANE_INCLUDE_DIRS} ../include )
+target_link_libraries(sane-canon_pixma pthread ${SANE_LIBRARIES} ${JPEG_LIBRARY} ${LIBUSB_LIBRARIES})
 target_link_libraries(sane-canon_pixma cncpmslld2 cncpnet2 cncpnet20 cncpnet30)
+target_compile_definitions(sane-canon_pixma PRIVATE "PACKAGE_DATA_DIR=\"../share/scangearmp2\"")
+target_compile_definitions(sane-canon_pixma PRIVATE "CNMSLIBPATH=../${CMAKE_INSTALL_LIBDIR}/bjlib")
+target_compile_definitions(sane-canon_pixma PRIVATE "ENABLE_NLS")
+
 
 install(TARGETS sane-canon_pixma DESTINATION "${CMAKE_INSTALL_LIBDIR}/sane/")
