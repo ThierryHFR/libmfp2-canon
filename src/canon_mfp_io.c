@@ -53,6 +53,10 @@
 # define FALSE 0
 #endif
 
+extern int is_flatbed;
+extern int is_adf;
+extern int is_duplex;
+
 /*---------------------------------------------------------------------------------------*/
 /*    definitions for CIJSC ---->                                                         */
 /*---------------------------------------------------------------------------------------*/
@@ -422,6 +426,12 @@ static CMT_Status attach(
 
 	dev->product_id = product;
 	dev->type = attach_dev->type;
+        if ( CIJSC_GET_SUPPORT_PLATEN( dev->type ) )
+            is_flatbed = 1;
+        if ( CIJSC_GET_SUPPORT_ADF_S( dev->type ) )
+            is_adf = 1;
+        if ( CIJSC_GET_SUPPORT_ADF_D( dev->type ) )
+            is_duplex = 1;
 	dev->speed = speed;
 	if ( attach_dev->ipaddress ) {
 		dev->ipaddress = strdup( attach_dev->ipaddress );
@@ -617,12 +627,6 @@ CMT_Status CIJSC_open(
 	const char *name )	/* libusb:00X:00Y or MAC address */
 {
 	CANON_Device *dev = NULL;
-	return CIJSC_open2(name,dev);
-}
-
-CMT_Status CIJSC_open2(
-	const char *name,CANON_Device *dev )	/* libusb:00X:00Y or MAC address */
-{
 	CMT_Status status;
 	CANON_Scanner *s = &canon_device;
 
@@ -697,7 +701,6 @@ CMT_Status CIJSC_open2(
 		DBGMSG("ERROR : p_canon_init_scanner() product = %d\n", dev->product_id);
 		return (CMT_STATUS_INVAL);
 	}
-
 	opened_handle = dev;
 	memset(&canon_device, 0, sizeof(canon_device));
 

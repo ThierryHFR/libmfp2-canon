@@ -26,7 +26,6 @@ include(GNUInstallDirs) # for make install
 
 include(FindPkgConfig)
 pkg_search_module(LIBUSB REQUIRED libusb-1.0)
-pkg_search_module(GLIB REQUIRED glib-2.0)
 pkg_search_module(SANE REQUIRED sane-backends)
 find_package(JPEG REQUIRED)
 
