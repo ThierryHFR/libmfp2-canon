@@ -1,3 +1,11 @@
+libmfp2-canon (0.2+2104ubuntu3) hirsute; urgency=medium
+
+  * Adf works
+  * Autodetec sources
+  * Use muti-resolution 75, 150, 300 and 600 works
+
+ -- Thierry HUCHARD (cle ubuntu) <thierry@substantiel.fr>  Thu, 19 Aug 2021 09:42:24 +0200
+
 libmfp2-canon (0.2+2104ubuntu1) hirsute; urgency=medium
 
   * Use cmake for packaging

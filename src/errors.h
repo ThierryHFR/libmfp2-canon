@@ -27,6 +27,8 @@
 #ifndef	_ERRORS_H_
 #define	_ERRORS_H_
 
+#include <stdio.h>
+#include <string.h>
 #include <errno.h>
 #include "cnmstype.h"
 
