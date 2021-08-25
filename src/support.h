@@ -57,9 +57,10 @@
 #  define N_(String) (String)
 #endif
 
-
-// #define	_SGMP_DEBUG
+/*
+#define	_SGMP_DEBUG
 #define	_SGMP_DEBUG_VERBOSE_
+*/
 
 
 /*

@@ -1,3 +1,12 @@
+libmfp2-canon (0.3-gtk3+subnet+bookworm1) bookworm; urgency=medium
+
+  * Add its device in /etc/sane.d/canon_pixma.conf
+    Allows you to use your device even if it is not
+    on the same network
+    Limitation of scangearmp2.
+
+ -- Thierry HUCHARD (cle ubuntu) <thierry@substantiel.fr>  Wed, 25 Aug 2021 11:08:38 +0200
+
 libmfp2-canon (0.2+2104ubuntu3) hirsute; urgency=medium
 
   * Adf works
