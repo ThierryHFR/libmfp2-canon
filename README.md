@@ -13,18 +13,35 @@ Sane backend 'canon_pixma' for CANON's scanners
 
 	We separated the code from the backend, to make it a library with only free code.
 
-	This library is dependent on the libcanon-proprio-bin :
-	  https://github.com/Ordissimo/libcanon-proprio-bin
-	Or scangearmp2 package provided by Canon :
-	The current version is 4.20, the list of scanners supported is below.
-	You can download the archive that contains the 32/64 bit driver here:
-	  https://gdlp01.c-wss.com/gds/8/0100011058/01/scangearmp2-4.20-1-deb.tar.gz
-	  or
-	  https://gdlp01.c-wss.com/gds/9/0100011059/01/scangearmp2-4.20-1-rpm.tar.gz
-	  or
-	  https://gdlp01.c-wss.com/gds/0/0100011060/01/scangearmp2-source-4.20-1.tar.gz
+	This library is incompatible with scangearmp2
        
 ```
+;
+; SANE Backend specification file
+;
+; It's basically emacs-lisp --- so ; indicates comment to end of line.
+; All syntactic elements are keyword tokens, followed by a string or
+;  keyword argument, as specified.
+;
+; :backend *must* be specified.
+; All other information is optional (but what good is the file without it?).
+;
+
+:backend canon_pixma                 ; name of backend
+;:version (external)             ; version of backend
+:url https://github.com/Ordissimo/libmfp2-canon/blob/master/README.md     ; backend's web page
+:comment External binary-only backend for Linux i386 and x86_64?. See the website for the latest release.
+
+
+
+:devicetype :scanner               ; start of a list of devices....
+                                   ; other types:  :stillcam, :vidcam,
+                                   ;               :meta, :api
+
+:mfg Canon                     ; name a manufacturer
+:url https://www.canon.com/
+:comment Multi Function Peripheral. External backend made by Canon.  Please check the Canon website and/or contact us if you have a Canon device not mentioned here.
+
 ## Add 2018
  XK80 series
  
@@ -151,6 +168,19 @@ TS7400 series
 GX6000 series
 GX7000 series
 TS5400 series
+
+TS5350i series
+G600 series
+TS3500 series
+TR4600 series
+E4500 series
+TR4700 series
+XK500 series
+TS8530 series
+XK100 series
+TS7530 series
+TS7450i series
+
 ```
 # ADVANTAGES
 
