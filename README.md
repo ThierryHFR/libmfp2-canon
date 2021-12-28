@@ -166,7 +166,7 @@ Tested with sane 1.0.25 and 1.0.32 (may not work for lower versions)<br>
 In Platen, the backend recognizes CARD, L_L, L_P, 4X6_L, 4X6_P, HAGAKI_L, HAGAKI_P, 2L_L, 2L_P, A5, B5, A4 and LETTER formats.<br>
 In ADF, the backend recognizes A4 and LETTER formats.<br>
 The scan works in color or in gray map.<br>
-The resolution option allow to have a 75, 150, 300 or 600 quality for the output.<br>
+The resolution option allow to have a 75, 150, 300, 600 or 1200 quality for the output.<br>
 The source option allow to chose between Platen, ADF and ADF Duplex, i don't have a means of detection, so it depends on the hardware.
 
 # KNOWN PROBLEMS
@@ -188,15 +188,9 @@ git clone https://github.com/Ordissimo/libmfp2-canon.git
 ###### Get developement environnement :
 ```
 apt-get update
-apt-get install debhelper libusb-1.0-0-dev libtool-bin libjpeg-dev
+apt-get install debhelper autotools-dev libglib2.0-dev libusb-1.0-0-dev libtool-bin libjpeg-dev libsane-dev autoconf cmake
 # or, if failure, use:
-apt-get install debhelper libusb-1.0-0-dev libtool libjpeg-dev
-cd /tmp
-wget https://gdlp01.c-wss.com/gds/8/0100011058/01/scangearmp2-4.20-1-deb.tar.gz
-tar xvf scangearmp2-4.20-1-deb.tar.gz
-arch="$(if [[ "$(uname -p)" = "x86_64" ]] ; then echo "amd64"; else echo "i386"; fi)"
-dpkg -i scangearmp2-4.20-1-deb/packages/scangearmp2_4.20-1_${arch}.deb
-cd -
+apt-get install debhelper autotools-dev libglib2.0-dev libusb-1.0-0-dev libtool libjpeg-dev libsane-dev autoconf cmake
 ```
 ###### Build Sources :
 ```
@@ -205,7 +199,7 @@ debuild -tc
 ```
 ###### Install :
 ```
-dpkg -i ../libmfp2-canon_0.1_amd64.deb
+dpkg -i ../libmfp2-canon_*.deb
 ```
 
 ## For redhat systems :
@@ -215,27 +209,17 @@ mkdir -p ~/rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
 ```
 ###### Get sources :
 ```
-####### first solution
-wget https://github.com/Ordissimo/libmfp2-canon/releases/download/0.1/libmfp2-canon-0.1-1.src.rpm
-rpm -ivh libmfp2-canon-0.1-1.src.rpm
-
-####### or second solution:
 cd ~/rpmbuild/SOURCES
 git clone https://github.com/Ordissimo/libmfp2-canon.git
 rm -rf libmfp2-canon/.git*
-mv libmfp2-canon libmfp2-canon-0.1
-tar czvf libmfp2-canon-0.1.orig.tar.gz libmfp2-canon-0.1
-cp libmfp2-canon-0.1/libmfp2-canon.spec ../SPECS/
-rm -rf libmfp2-canon-0.1
+mv libmfp2-canon libmfp2-canon-4.30
+tar czvf libmfp2-canon-4.30.orig.tar.gz libmfp2-canon-4.30
+cp libmfp2-canon-4.30/libmfp2-canon.spec ../SPECS/
+rm -rf libmfp2-canon-4.30
 ```
 ###### Get developement environnement :
 ```
-cd /tmp
-wget http://gdlp01.c-wss.com/gds/2/0100009932/01/scangearmp2-4.20-1-rpm.tar.gz
-tar xvf scangearmp2-4.20-1-rpm.tar.gz
-rpm -ivh scangearmp2-4.20-1-rpm/packages/scangearmp2-4.20-1.$(uname -p).rpm
-rm -rf scangearmp2-4.20-1-rpm
-yum install gcc make libjpeg-turbo-devel libusbx-devel libtool automake autoconf
+yum install gcc make libjpeg-turbo-devel libusbx-devel libtool automake autoconf sane-backends-devel
 ```
 ###### Build Sources :
 ```
