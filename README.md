@@ -230,9 +230,9 @@ rpmbuild -ba libmfp2-canon.spec
 ```
 cd ~/rpmbuild/RPMS
 # if CentOS7
-rpm -i libmfp2-canon-0.1*.rpm
+rpm -i libmfp2-canon-4.30*.rpm
 # else if Fedora 30
-rpm -i */libmfp2-canon-0.1*.rpm
+rpm -i */libmfp2-canon-4.30*.rpm
 ```
 
 # LICENSE
