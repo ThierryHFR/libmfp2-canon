@@ -16,32 +16,6 @@ Sane backend 'canon_pixma' for CANON's scanners
 	This library is incompatible with scangearmp2
        
 ```
-;
-; SANE Backend specification file
-;
-; It's basically emacs-lisp --- so ; indicates comment to end of line.
-; All syntactic elements are keyword tokens, followed by a string or
-;  keyword argument, as specified.
-;
-; :backend *must* be specified.
-; All other information is optional (but what good is the file without it?).
-;
-
-:backend canon_pixma                 ; name of backend
-;:version (external)             ; version of backend
-:url https://github.com/Ordissimo/libmfp2-canon/blob/master/README.md     ; backend's web page
-:comment External binary-only backend for Linux i386 and x86_64?. See the website for the latest release.
-
-
-
-:devicetype :scanner               ; start of a list of devices....
-                                   ; other types:  :stillcam, :vidcam,
-                                   ;               :meta, :api
-
-:mfg Canon                     ; name a manufacturer
-:url https://www.canon.com/
-:comment Multi Function Peripheral. External backend made by Canon.  Please check the Canon website and/or contact us if you have a Canon device not mentioned here.
-
 ## Add 2018
  XK80 series
  
