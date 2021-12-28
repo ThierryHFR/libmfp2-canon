@@ -31,6 +31,10 @@
 #endif
 
 
+#ifndef _HAVE_SANE
+#define _HAVE_SANE
+#endif
+
 #include "support.h"
 
 int CIJSC_UI_error_show( SGMP_Data_Lite *data );

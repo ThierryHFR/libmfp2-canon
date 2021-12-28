@@ -1,4 +1,10 @@
-libmfp2-canon (0.3-gtk3+subnet+bookworm1) bookworm; urgency=medium
+libmfp2-canon (4.30-2110gtk3+subnet) impish; urgency=medium
+
+  * Update upstream
+
+ -- Thierry HUCHARD (cle ubuntu) <thierry@substantiel.fr>  Tue, 28 Dec 2021 01:34:46 +0100
+
+libmfp2-canon (4.10-1604gtk3+subnet) xenial; urgency=medium
 
   * Add its device in /etc/sane.d/canon_pixma.conf
     Allows you to use your device even if it is not

@@ -3,6 +3,11 @@
  *******************************************************************/
 
 #define _GNU_SOURCE
+
+#ifndef _HAVE_SANE
+#define _HAVE_SANE
+#endif
+
 #include "canon_pixma.h"
 #include <sane/sane.h>
 #include <sane/saneopts.h>

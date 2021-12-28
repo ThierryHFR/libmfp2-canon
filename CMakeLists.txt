@@ -32,6 +32,13 @@ find_package(JPEG REQUIRED)
 option(DEBUG "turn on debug info" OFF)
 
 add_subdirectory(src)
+if (X64 EQUAL 1)
+add_subdirectory(usr/lib64)
+else()
+add_subdirectory(usr/lib32)
+endif()
 
+install(FILES "etc/udev/rules.d/80-canon_mfp2.rules" DESTINATION "/etc/udev/rules.d/")
 install(FILES "etc/sane.d/dll.d/mfp2" DESTINATION "/etc/sane.d/dll.d/")
+install(FILES "etc/sane.d/canon_pixma.conf" DESTINATION "/etc/sane.d/")
 install(FILES "etc/canon-scan.xml" DESTINATION "/etc/")

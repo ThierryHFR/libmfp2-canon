@@ -1,0 +1,1 @@
+install(DIRECTORY doc DESTINATION "${CMAKE_INSTALL_DATADIR}/scangearmp2")

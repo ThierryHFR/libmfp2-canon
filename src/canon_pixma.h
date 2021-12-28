@@ -4,6 +4,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
+
+#ifndef _HAVE_SANE
+#define _HAVE_SANE
+#endif
+
 #include "errors.h"
 #include "errordlg.h"
 #include "cnmstype.h"

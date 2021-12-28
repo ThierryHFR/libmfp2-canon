@@ -48,7 +48,7 @@ CNMSInt32 CnmsStrLen(
 {
 	CNMSInt32	ret = CNMS_ERR;
 
-	if( lpStr == CNMSNULL ){
+	if( lpStr == CNMSNULL || *lpStr == 0){
 		DBGMSG( "[CnmsStrLen]Parameter is error.\n" );
 		goto	EXIT;
 	}
