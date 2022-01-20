@@ -1,0 +1,244 @@
+# 80-canon_mfp2.rules
+
+ACTION!="add", GOTO="canon_mfp_end"
+SUBSYSTEM=="usb_device", GOTO="canon_mfp_start"
+SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", GOTO="canon_mfp_start"
+GOTO="canon_mfp_end"
+
+LABEL="canon_mfp_start"
+
+#TS5350i series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="18d9", MODE="666"
+#G600 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="18d5", MODE="666"
+#TS3500 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="18d4", MODE="666"
+#TR4600 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="18da", MODE="666"
+#E4500 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="18db", MODE="666"
+#TR4700 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="18dc", MODE="666"
+#XK500 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="18df", MODE="666"
+#TS8530 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="18e0", MODE="666"
+#XK100 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="18e2", MODE="666"
+#TS7530 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="18e1", MODE="666"
+#TS7450i series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="18f7", MODE="666"
+
+#GX6000 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="18a6", MODE="666"
+#GX7000 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="18a8", MODE="666"
+#TS5400 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="18d8", MODE="666"
+
+#TS3400 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="18b7", MODE="666"
+#E3400 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="18b8", MODE="666"
+#TR7000 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="18b9", MODE="666"
+#G2020 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="18bd", MODE="666"
+#G3060 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="18c3", MODE="666"
+#G2060 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="18c1", MODE="666"
+#G3020 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="18bf", MODE="666"
+#TS7430 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="18b2", MODE="666"
+#XK90 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="18b6", MODE="666"
+#TS8430 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="18b5", MODE="666"
+#TR7600 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="18aa", MODE="666"
+#TR8600 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="18ad", MODE="666"
+#TR8630 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="18af", MODE="666"
+#TS6400 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="18d3", MODE="666"
+#TS7400 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="18d7", MODE="666"
+
+#G7000 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1863", MODE="666"
+#G7080 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1864", MODE="666"
+#GM4000 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1869", MODE="666"
+#GM4080 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="186a", MODE="666"
+#G6000 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1865", MODE="666"
+#G6080 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1866", MODE="666"
+#TS5300 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="188b", MODE="666"
+#TS5380 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="188c", MODE="666"
+#TS6300 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="188d", MODE="666"
+#TS6380 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="188e", MODE="666"
+#TS7330 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="188f", MODE="666"
+#TS8300 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1890", MODE="666"
+#TS8380 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1891", MODE="666"
+#TS8330 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1892", MODE="666"
+#XK60 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1893", MODE="666"
+#TS6330 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1894", MODE="666"
+#TS3300 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="18a2", MODE="666"
+#E3300 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="18a3", MODE="666"
+
+#MG7500 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="177c", MODE="666"
+#MG6600 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="177e", MODE="666"
+#MG5600 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="177f", MODE="666"
+#MG2900 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1780", MODE="666"
+#MB2000 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1778", MODE="666"
+#MB2300 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1779", MODE="666"
+#MB5000 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1776", MODE="666"
+#MB5300 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1777", MODE="666"
+#E460 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1788", MODE="666"
+
+#MX450 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1768", MODE="666"
+#MX490 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1787", MODE="666"
+#E480 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1789", MODE="666"
+
+#MG7700 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="178b", MODE="666"
+#MG6900 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="178c", MODE="666"
+#MG6800 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="178d", MODE="666"
+#MG5700 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="178e", MODE="666"
+#MG3600 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="178a", MODE="666"
+
+#G3000 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1794", MODE="666"
+
+#TS9000 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="179f", MODE="666"
+#TS8000 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1800", MODE="666"
+#TS6000 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1801", MODE="666"
+#TS5000 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1802", MODE="666"
+#MG3000 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="180b", MODE="666"
+#E470 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="180c", MODE="666"
+#G4000 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="181d", MODE="666"
+
+#MB2100 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1793", MODE="666"
+#MB2700 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1792", MODE="666"
+#MB5100 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1790", MODE="666"
+#MB5400 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="178f", MODE="666"
+
+#TS9100 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1820", MODE="666"
+#TS8100 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1821", MODE="666"
+#TS6100 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1822", MODE="666"
+#TR8500 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1823", MODE="666"
+#TR7500 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1824", MODE="666"
+#TS5100 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1825", MODE="666"
+#TS3100 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1827", MODE="666"
+#E3100 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1828", MODE="666"
+#TS9180 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="183e", MODE="666"
+#TS8180 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="183f", MODE="666"
+#TS6180 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1840", MODE="666"
+#TR8580 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1841", MODE="666"
+#TS8130 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1842", MODE="666"
+#TS6130 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1843", MODE="666"
+#TR8530 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1844", MODE="666"
+#TR7530 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1845", MODE="666"
+#XK50 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1846", MODE="666"
+#XK70 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1847", MODE="666"
+
+#G3010 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="183b", MODE="666"
+#G4010 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="183d", MODE="666"
+
+#TS8200 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1859", MODE="666"
+#XK80 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1873", MODE="666"
+#TS8230 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="185b", MODE="666"
+#TS8280 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="185a", MODE="666"
+#TS6200 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1856", MODE="666"
+#TS6230 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1858", MODE="666"
+#TS6280 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1857", MODE="666"
+#TS9500 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="185c", MODE="666"
+#TR9530 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="185e", MODE="666"
+#TS9580 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="185d", MODE="666"
+#TR4500 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1854", MODE="666"
+#E4200 series
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1855", MODE="666"
+#LiDE 400
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1912", MODE="666"
+#LiDE 300
+ATTR{idVendor}=="04a9", ATTR{idProduct}=="1913", MODE="666"
+
+
+LABEL="canon_mfp_end"
